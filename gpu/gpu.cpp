@@ -4,6 +4,7 @@
  * Students do not have to look here.
  */
 
+
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -31,6 +32,7 @@
 #define __func__ __FUNCTION__
 #endif
 
+
 template<typename TYPE>
 std::string fceArgError2Str(TYPE const &value, std::string const &fceName)
 {
@@ -38,6 +40,7 @@ std::string fceArgError2Str(TYPE const &value, std::string const &fceName)
 	ss << "ERROR: " << fceName << "(..., " << value << ", ...) failed: ";
 	return ss.str();
 }
+
 
 template<typename TYPE>
 std::string fceArgWarning2Str(TYPE const &value, std::string const &fceName)
@@ -47,11 +50,13 @@ std::string fceArgWarning2Str(TYPE const &value, std::string const &fceName)
 	return ss.str();
 }
 
+
 void printAttribIndexError(size_t attribIndex, std::string const &fceName)
 {
 	std::cerr << fceArgError2Str(attribIndex, fceName)
 		<< "attribute index cannot be >= " << MAX_ATTRIBUTES << std::endl;
 }
+
 
 std::string uniformType2Str(UniformType const &type)
 {
@@ -73,6 +78,7 @@ std::string uniformType2Str(UniformType const &type)
 			return "unknown";
 	}
 }
+
 
 std::string attribType2Str(AttributeType const &type)
 {
@@ -100,6 +106,7 @@ public:
 	UniformType type;
 	std::shared_ptr<uint8_t> data;
 
+
 	UniformImplementation(UniformType const &t, uint8_t *const &d)
 		: type(t), data(
 		d, [](uint8_t *const &ptr)
@@ -122,11 +129,13 @@ public:
 		: PullerAttribTuple(puller, attrib)
 	{}
 
+
 	enum Parts
 	{
 		PULLER = 0,
 		ATTRIB = 1,
 	};
+
 
 	bool operator<(PullerAttrib const &other) const
 	{
@@ -141,10 +150,12 @@ public:
 		return false;
 	}
 
+
 	VertexPullerID getPuller() const
 	{
 		return std::get<PULLER>(*this);
 	}
+
 
 	size_t getAttrib() const
 	{
@@ -167,41 +178,49 @@ public:
 		: PullerReferencesTuple(indexBuffer, attribBuffers)
 	{}
 
+
 	enum Parts
 	{
 		INDEX_BUFFER = 0,
 		ATTRIB_BUFFERS = 1,
 	};
 
+
 	BufferID const &getIndexBuffer() const
 	{
 		return std::get<INDEX_BUFFER>(*this);
 	}
+
 
 	AttribBuffers const &getAttribBuffers() const
 	{
 		return std::get<ATTRIB_BUFFERS>(*this);
 	}
 
+
 	BufferID &getIndexBuffer()
 	{
 		return std::get<INDEX_BUFFER>(*this);
 	}
+
 
 	AttribBuffers &getAttribBuffers()
 	{
 		return std::get<ATTRIB_BUFFERS>(*this);
 	}
 
+
 	BufferID const &getAttribBuffer(AttribIndex const &index) const
 	{
 		return this->getAttribBuffers().at(index);
 	}
 
+
 	BufferID &getAttribBuffer(AttribIndex const &index)
 	{
 		return this->getAttribBuffers().at(index);
 	}
+
 
 	bool hasAttribBuffer(AttribIndex const &index) const
 	{
@@ -225,26 +244,31 @@ public:
 		: BufferReferencesTuple(indexings, attribs)
 	{}
 
+
 	enum Parts
 	{
 		INDEXING = 0,
 		ATTRIBS = 1,
 	};
 
+
 	PullerSet const &getIndexings() const
 	{
 		return std::get<INDEXING>(*this);
 	}
+
 
 	PullerAttribSet const &getAttribs() const
 	{
 		return std::get<ATTRIBS>(*this);
 	}
 
+
 	PullerSet &getIndexings()
 	{
 		return std::get<INDEXING>(*this);
 	}
+
 
 	PullerAttribSet &getAttribs()
 	{
@@ -267,6 +291,7 @@ public:
 	AttributeType type;
 	InterpolationType interpolation;
 
+
 	AttribInterpolation(
 		AttributeType const &t = ATTRIB_EMPTY,
 		InterpolationType const &inter = SMOOTH
@@ -283,6 +308,7 @@ public:
 	FragmentShader fragmentShader = nullptr;
 	std::array<AttribInterpolation, MAX_ATTRIBUTES> interpolations;
 
+
 	ProgramSettings(
 		VertexShader const &vs = nullptr,
 		FragmentShader const &fs = nullptr
@@ -298,8 +324,10 @@ public:
 	GpuImplementation()
 	{}
 
+
 	~GpuImplementation()
 	{}
+
 
 	size_t static const EMPTY_BUFFER_ID = 0;
 	size_t static const EMPTY_VAO_ID = 0;
@@ -311,6 +339,7 @@ public:
 	std::vector<Vec4> colorBuffer;
 
 	size_t static const outOfRange;
+
 
 	size_t getLinearPixelCoord(
 		size_t x, size_t y,
@@ -334,6 +363,7 @@ public:
 		return y * w + x;
 	}
 
+
 	std::map<BufferID, std::vector<uint8_t>> buffers;  // this holds gpu buffers
 	BufferID bufferCounter = 1;  // this holds number of already allocated buffers
 	// (even deleted), zero is reserved for empty
@@ -354,15 +384,19 @@ public:
 	// programs (even deleted), zero is reserved
 	// for emty program
 	ProgramID activeProgram = 0;   // currently used program
+
+
 	enum ProgramParts
 	{
 		VERTEX_SHADER = 0,
 		FRAGMENT_SHADER = 1,
 	};
 
+
 	using bufferIterator  = decltype(buffers)::iterator;
 	using vaoIterator     = decltype(vaos)::iterator;
 	using programIterator = decltype(programs)::iterator;
+
 
 	bufferIterator getBuffer(BufferID const &id, std::string const &fceName)
 	{
@@ -377,6 +411,7 @@ public:
 		return bit;
 	}
 
+
 	vaoIterator getVAO(VertexPullerID const &id, std::string const &fceName)
 	{
 		auto it = this->vaos.find(id);
@@ -390,6 +425,7 @@ public:
 		return it;
 	}
 
+
 	programIterator getProgram(ProgramID const &id, std::string const &fceName)
 	{
 		auto it = this->programs.find(id);
@@ -402,6 +438,7 @@ public:
 		}
 		return it;
 	}
+
 
 	void setEnableVertexAttrib(
 		VertexPullerID const &puller,
@@ -426,6 +463,7 @@ public:
 
 size_t const GpuImplementation::outOfRange = std::numeric_limits<size_t>::max();
 
+
 GPU cpu_createGPU()
 {
 	auto gpu = new GpuImplementation();
@@ -433,8 +471,10 @@ GPU cpu_createGPU()
 	return static_cast<GPU>(gpu);
 }
 
+
 void cpu_destroyGPU(GPU gpu)
 { delete static_cast<GpuImplementation *>(gpu); }
+
 
 size_t uniformSize(UniformType const &type)
 {
@@ -456,6 +496,7 @@ size_t uniformSize(UniformType const &type)
 			return 0;
 	}
 }
+
 
 void cpu_reserveUniform(
 	GPU const gpu, char const *const name,
@@ -482,6 +523,7 @@ void cpu_reserveUniform(
 	g->uniforms.uniforms.emplace_back(type, data);
 }
 
+
 UniformLocation getUniformLocation(GPU const gpu, char const *const name)
 {
 	assert(gpu != nullptr);
@@ -492,6 +534,7 @@ UniformLocation getUniformLocation(GPU const gpu, char const *const name)
 	{ return -1; }
 	return static_cast<UniformLocation>(it->second);
 }
+
 
 #define CPU_UNIFORM_UPLOAD_IMPLEMENTATION(type)                                \
   assert(gpu != nullptr);                                                      \
@@ -511,6 +554,7 @@ UniformLocation getUniformLocation(GPU const gpu, char const *const name)
   }                                                                            \
   auto ptr = reinterpret_cast<type*>(&*g->uniforms.uniforms.at(index).data)
 
+
 void cpu_uniform1f(
 	GPU const gpu, UniformLocation const location,
 	float const v0
@@ -519,6 +563,7 @@ void cpu_uniform1f(
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
 	ptr[0] = v0;
 }
+
 
 void cpu_uniform2f(
 	GPU const gpu, UniformLocation const location,
@@ -530,6 +575,7 @@ void cpu_uniform2f(
 	ptr[1] = v1;
 }
 
+
 void cpu_uniform3f(
 	GPU const gpu, UniformLocation const location,
 	float const v0, float const v1, float const v2
@@ -540,6 +586,7 @@ void cpu_uniform3f(
 	ptr[1] = v1;
 	ptr[2] = v2;
 }
+
 
 void cpu_uniform4f(
 	GPU const gpu, UniformLocation const location,
@@ -554,6 +601,7 @@ void cpu_uniform4f(
 	ptr[3] = v3;
 }
 
+
 void cpu_uniformMatrix4fv(
 	GPU const gpu, UniformLocation const location,
 	float const *const data
@@ -562,6 +610,7 @@ void cpu_uniformMatrix4fv(
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
 	std::memcpy(ptr, data, uniformSize(UNIFORM_MAT4));
 }
+
 
 #define GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(uniformType, typeName)         \
   assert(uniforms != nullptr);                                             \
@@ -587,6 +636,7 @@ void cpu_uniformMatrix4fv(
   }                                                                        \
   return reinterpret_cast<typeName const*>(&*u->uniforms.at(index).data)
 
+
 float const *shader_interpretUniformAsFloat(
 	Uniforms const uniforms,
 	UniformLocation const location
@@ -594,6 +644,7 @@ float const *shader_interpretUniformAsFloat(
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_FLOAT, float);
 }
+
 
 Vec2 const *shader_interpretUniformAsVec2(
 	Uniforms const uniforms,
@@ -603,6 +654,7 @@ Vec2 const *shader_interpretUniformAsVec2(
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_VEC2, Vec2);
 }
 
+
 Vec3 const *shader_interpretUniformAsVec3(
 	Uniforms const uniforms,
 	UniformLocation const location
@@ -610,6 +662,7 @@ Vec3 const *shader_interpretUniformAsVec3(
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_VEC3, Vec3);
 }
+
 
 Vec4 const *shader_interpretUniformAsVec4(
 	Uniforms const uniforms,
@@ -619,6 +672,7 @@ Vec4 const *shader_interpretUniformAsVec4(
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_VEC4, Vec4);
 }
 
+
 Mat4 const *shader_interpretUniformAsMat4(
 	Uniforms const uniforms,
 	UniformLocation const location
@@ -626,6 +680,7 @@ Mat4 const *shader_interpretUniformAsMat4(
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_MAT4, Mat4);
 }
+
 
 void cpu_createBuffers(GPU const gpu, size_t const n, BufferID *const buffers)
 {
@@ -641,6 +696,7 @@ void cpu_createBuffers(GPU const gpu, size_t const n, BufferID *const buffers)
 	}
 	g->bufferCounter += n;
 }
+
 
 void cpu_bufferData(
 	GPU const gpu, BufferID const buffer, size_t const size,
@@ -675,6 +731,7 @@ void cpu_bufferData(
 	}
 }
 
+
 void cpu_createVertexPullers(
 	GPU const gpu, size_t const n,
 	VertexPullerID *const arrays
@@ -700,6 +757,7 @@ void cpu_createVertexPullers(
 	}
 	g->vaoCounter += n;
 }
+
 
 void cpu_setVertexPullerHead(
 	GPU const gpu, VertexPullerID const puller,
@@ -740,6 +798,7 @@ void cpu_setVertexPullerHead(
 	g->bufferReferences.at(buffer).getAttribs().insert(
 		PullerAttrib(puller, attribIndex));
 }
+
 
 void cpu_setIndexing(
 	GPU const gpu, VertexPullerID const puller,
@@ -783,6 +842,7 @@ void cpu_setIndexing(
 	g->bufferReferences.at(buffer).getIndexings().insert(puller);
 }
 
+
 void cpu_enableVertexPullerHead(
 	GPU const gpu, VertexPullerID const puller,
 	size_t const attribIndex
@@ -793,6 +853,7 @@ void cpu_enableVertexPullerHead(
 	g->setEnableVertexAttrib(puller, attribIndex, true, __func__);
 }
 
+
 void cpu_disableVertexPullerHead(
 	GPU const gpu, VertexPullerID const puller,
 	size_t const attribIndex
@@ -802,6 +863,7 @@ void cpu_disableVertexPullerHead(
 	auto g = static_cast<GpuImplementation *>(gpu);
 	g->setEnableVertexAttrib(puller, attribIndex, false, __func__);
 }
+
 
 void cpu_bindVertexPuller(GPU const gpu, VertexPullerID const id)
 {
@@ -815,6 +877,7 @@ void cpu_bindVertexPuller(GPU const gpu, VertexPullerID const id)
 	g->activeVao = id;
 }
 
+
 ProgramID cpu_createProgram(GPU const gpu)
 {
 	assert(gpu != nullptr);
@@ -825,6 +888,7 @@ ProgramID cpu_createProgram(GPU const gpu)
 	return result;
 }
 
+
 void cpu_deleteProgram(GPU const gpu, ProgramID const program)
 {
 	assert(gpu != nullptr);
@@ -834,6 +898,7 @@ void cpu_deleteProgram(GPU const gpu, ProgramID const program)
 	{ return; }
 	g->programs.erase(it->first);
 }
+
 
 void cpu_attachVertexShader(
 	GPU const gpu, ProgramID const program,
@@ -848,6 +913,7 @@ void cpu_attachVertexShader(
 	it->second.vertexShader = shader;
 }
 
+
 void cpu_attachFragmentShader(
 	GPU const gpu, ProgramID const program,
 	FragmentShader const shader
@@ -860,6 +926,7 @@ void cpu_attachFragmentShader(
 	{ return; }
 	it->second.fragmentShader = shader;
 }
+
 
 void cpu_useProgram(GPU const gpu, ProgramID const program)
 {
@@ -880,12 +947,14 @@ void cpu_useProgram(GPU const gpu, ProgramID const program)
 	//  std::cout<<std::showpos<<std::scientific<<std::setprecision(10)<<projectionMatrix.column[i/4].data[i%4]<<"f"<<std::endl;
 }
 
+
 Uniforms gpu_getUniformsHandle(GPU const gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
 	return static_cast<AllUniforms *>(&g->uniforms);
 }
+
 
 void cpu_setViewportSize(
 	GPU const gpu, size_t const width,
@@ -901,6 +970,7 @@ void cpu_setViewportSize(
 	g->depthBuffer.resize(nofPixels);
 }
 
+
 size_t gpu_getViewportWidth(GPU const gpu)
 {
 	assert(gpu != nullptr);
@@ -908,12 +978,14 @@ size_t gpu_getViewportWidth(GPU const gpu)
 	return g->viewportWidth;
 }
 
+
 size_t gpu_getViewportHeight(GPU const gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
 	return g->viewportHeight;
 }
+
 
 GPUVertexPullerConfiguration const *gpu_getActiveVertexPuller(GPU const gpu)
 {
@@ -925,6 +997,7 @@ GPUVertexPullerConfiguration const *gpu_getActiveVertexPuller(GPU const gpu)
 	return &it->second;
 }
 
+
 VertexShader gpu_getActiveVertexShader(GPU const gpu)
 {
 	assert(gpu != nullptr);
@@ -934,6 +1007,7 @@ VertexShader gpu_getActiveVertexShader(GPU const gpu)
 	{ exit(1); }
 	return it->second.vertexShader;
 }
+
 
 FragmentShader gpu_getActiveFragmentShader(GPU const gpu)
 {
@@ -945,6 +1019,7 @@ FragmentShader gpu_getActiveFragmentShader(GPU const gpu)
 	return it->second.fragmentShader;
 }
 
+
 void cpu_clearColor(GPU const gpu, Vec4 const *const color)
 {
 	assert(gpu != nullptr);
@@ -953,6 +1028,7 @@ void cpu_clearColor(GPU const gpu, Vec4 const *const color)
 	{ copy_Vec4(&x, color); }
 }
 
+
 void cpu_clearDepth(GPU const gpu, float const depth)
 {
 	assert(gpu != nullptr);
@@ -960,6 +1036,7 @@ void cpu_clearDepth(GPU const gpu, float const depth)
 	for (auto &x : g->depthBuffer)
 	{ x = depth; }
 }
+
 
 Vec4 const *cpu_getColor(GPU const gpu, size_t const x, size_t const y)
 {
@@ -971,6 +1048,7 @@ Vec4 const *cpu_getColor(GPU const gpu, size_t const x, size_t const y)
 	return &g->colorBuffer.at(index);
 }
 
+
 float gpu_getDepth(GPU const gpu, size_t const x, size_t const y)
 {
 	assert(gpu != nullptr);
@@ -980,6 +1058,7 @@ float gpu_getDepth(GPU const gpu, size_t const x, size_t const y)
 	{ exit(1); }
 	return g->depthBuffer.at(index);
 }
+
 
 void gpu_setDepth(
 	GPU const gpu, size_t const x, size_t const y,
@@ -994,6 +1073,7 @@ void gpu_setDepth(
 	g->depthBuffer.at(index) = depth;
 }
 
+
 void gpu_setColor(
 	GPU const gpu, size_t const x, size_t const y,
 	Vec4 const *const color
@@ -1006,6 +1086,7 @@ void gpu_setColor(
 	{ exit(1); }
 	copy_Vec4(&g->colorBuffer.at(index), color);
 }
+
 
 void cpu_setAttributeInterpolation(
 	GPU const gpu, ProgramID const program,
@@ -1028,6 +1109,7 @@ void cpu_setAttributeInterpolation(
 	it->second.interpolations[attribIndex].interpolation = interpolation;
 }
 
+
 InterpolationType gpu_getAttributeInterpolation(
 	GPU const gpu,
 	size_t const attribIndex
@@ -1046,6 +1128,7 @@ InterpolationType gpu_getAttributeInterpolation(
 	return it->second.interpolations[attribIndex].interpolation;
 }
 
+
 AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
 {
 	if (attribIndex >= MAX_ATTRIBUTES)
@@ -1060,6 +1143,7 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
 	{ exit(1); }
 	return it->second.interpolations[attribIndex].type;
 }
+
 
 #define GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(TYPE)   \
   assert(vertex != nullptr);                                                   \
@@ -1123,6 +1207,7 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
   return reinterpret_cast<TYPE const*>(                                        \
       vertex->attributes->attributes[attributeIndex])
 
+
 float const *vs_interpretInputVertexAttributeAsFloat(
 	GPU const gpu, GPUVertexShaderInput const *const vertex,
 	AttribIndex const attributeIndex
@@ -1130,6 +1215,7 @@ float const *vs_interpretInputVertexAttributeAsFloat(
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(float);
 }
+
 
 Vec2 const *vs_interpretInputVertexAttributeAsVec2(
 	GPU const gpu, GPUVertexShaderInput const *const vertex,
@@ -1139,6 +1225,7 @@ Vec2 const *vs_interpretInputVertexAttributeAsVec2(
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(Vec2);
 }
 
+
 Vec3 const *vs_interpretInputVertexAttributeAsVec3(
 	GPU const gpu, GPUVertexShaderInput const *const vertex,
 	AttribIndex const attributeIndex
@@ -1147,6 +1234,7 @@ Vec3 const *vs_interpretInputVertexAttributeAsVec3(
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(Vec3);
 }
 
+
 Vec4 const *vs_interpretInputVertexAttributeAsVec4(
 	GPU const gpu, GPUVertexShaderInput const *const vertex,
 	AttribIndex const attributeIndex
@@ -1154,6 +1242,7 @@ Vec4 const *vs_interpretInputVertexAttributeAsVec4(
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(Vec4);
 }
+
 
 #define GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(TYPE, \
                                                                         ENUM) \
@@ -1177,6 +1266,7 @@ Vec4 const *vs_interpretInputVertexAttributeAsVec4(
   }                                                                           \
   return reinterpret_cast<TYPE*>(vertex->attributes[attributeIndex])
 
+
 float *vs_interpretOutputVertexAttributeAsFloat(
 	GPU const gpu, GPUVertexShaderOutput *const vertex,
 	AttribIndex const attributeIndex
@@ -1185,6 +1275,7 @@ float *vs_interpretOutputVertexAttributeAsFloat(
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(float,
 		ATTRIB_FLOAT);
 }
+
 
 Vec2 *vs_interpretOutputVertexAttributeAsVec2(
 	GPU const gpu, GPUVertexShaderOutput *const vertex,
@@ -1195,6 +1286,7 @@ Vec2 *vs_interpretOutputVertexAttributeAsVec2(
 		ATTRIB_VEC2);
 }
 
+
 Vec3 *vs_interpretOutputVertexAttributeAsVec3(
 	GPU const gpu, GPUVertexShaderOutput *const vertex,
 	AttribIndex const attributeIndex
@@ -1204,6 +1296,7 @@ Vec3 *vs_interpretOutputVertexAttributeAsVec3(
 		ATTRIB_VEC3);
 }
 
+
 Vec4 *vs_interpretOutputVertexAttributeAsVec4(
 	GPU const gpu, GPUVertexShaderOutput *const vertex,
 	AttribIndex const attributeIndex
@@ -1212,6 +1305,7 @@ Vec4 *vs_interpretOutputVertexAttributeAsVec4(
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(Vec4,
 		ATTRIB_VEC4);
 }
+
 
 #define GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(TYPE, \
                                                                          ENUM) \
@@ -1236,6 +1330,7 @@ Vec4 *vs_interpretOutputVertexAttributeAsVec4(
   return reinterpret_cast<TYPE const*>(                                        \
       fragment->attributes.attributes[attributeIndex])
 
+
 float const *fs_interpretInputAttributeAsFloat(
 	GPU const gpu, GPUFragmentShaderInput const *const fragment,
 	AttribIndex const attributeIndex
@@ -1244,6 +1339,7 @@ float const *fs_interpretInputAttributeAsFloat(
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(
 		float, ATTRIB_FLOAT);
 }
+
 
 Vec2 const *fs_interpretInputAttributeAsVec2(
 	GPU const gpu, GPUFragmentShaderInput const *const fragment,
@@ -1254,6 +1350,7 @@ Vec2 const *fs_interpretInputAttributeAsVec2(
 		ATTRIB_VEC2);
 }
 
+
 Vec3 const *fs_interpretInputAttributeAsVec3(
 	GPU const gpu, GPUFragmentShaderInput const *const fragment,
 	AttribIndex const attributeIndex
@@ -1262,6 +1359,7 @@ Vec3 const *fs_interpretInputAttributeAsVec3(
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(Vec3,
 		ATTRIB_VEC3);
 }
+
 
 Vec4 const *fs_interpretInputAttributeAsVec4(
 	GPU const gpu, GPUFragmentShaderInput const *const fragment,
