@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <tests/conformanceTests.h>
-
 #include <student/camera.h>
 #include <student/linearAlgebra.h>
 #include <student/mouseCamera.h>

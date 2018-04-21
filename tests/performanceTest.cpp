@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <tests/performanceTest.h>
-
 #include <student/linearAlgebra.h>
 #include <student/mouseCamera.h>
 #include <student/student_cpu.h>

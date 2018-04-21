@@ -1,4 +1,5 @@
-/* @author Tomáš Milet, imilet@fit.vutbr.cz
+/**
+ * @author Tomáš Milet, imilet@fit.vutbr.cz
  *
  * This file contains implementation of simplyfied virtual GPU.
  * Students do not have to look here.
