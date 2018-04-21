@@ -16,15 +16,15 @@
 #include <3rdParty/catch.hpp>
 
 
-char const *groundTruthFile = nullptr;
-GPUVertexShaderOutput const *outputs[3];
+const char *groundTruthFile = nullptr;
+const GPUVertexShaderOutput *outputs[3];
 GPUVertexShaderInput inputs[3];
 GPU gpus[3];
 GPUVertexPullerOutput pullerOutputs[3];
 size_t vsInvocationCounter = 0;
 
 
-bool equalFloats(float const &a, float const &b)
+bool equalFloats(const float &a, const float &b)
 {
 	return fabs(a - b) <= 0.001f;
 }
@@ -33,7 +33,7 @@ bool equalFloats(float const &a, float const &b)
 // dummy vertex shader for testing
 void vs_test(
 	GPUVertexShaderOutput *const output,
-	GPUVertexShaderInput const *const input, GPU const gpu
+	const GPUVertexShaderInput *const input, const GPU gpu
 )
 {
 	if (vsInvocationCounter < 3)
@@ -41,7 +41,10 @@ void vs_test(
 		// write output
 		outputs[vsInvocationCounter] = output;
 		// write input pointer
-		memcpy(inputs + vsInvocationCounter, input, sizeof(GPUVertexShaderInput));
+		memcpy(
+			inputs + vsInvocationCounter, input,
+			sizeof(GPUVertexShaderInput)
+		);
 		// write input attributes
 		memcpy(
 			pullerOutputs + vsInvocationCounter, input->attributes,
@@ -60,7 +63,7 @@ TEST_CASE("gpu_computeGLVertexID should compute gl_VertexID.")
 {
 	WHEN(" using indexing")
 	{
-		VertexIndex const indices[] = {0, 1, 2, 2, 1, 3};
+		const VertexIndex indices[] = {0, 1, 2, 2, 1, 3};
 		REQUIRE(gpu_computeGLVertexID(indices, 0) == 0);
 		REQUIRE(gpu_computeGLVertexID(indices, 1) == 1);
 		REQUIRE(gpu_computeGLVertexID(indices, 2) == 2);
@@ -97,7 +100,7 @@ TEST_CASE(
 	"gpu_runVertexPuller should construct vertex and fill vertex attributes.")
 {
 	GPUVertexPullerConfiguration puller;
-	VertexIndex const indices[] = {
+	const VertexIndex indices[] = {
 		0, 1, 4, 4, 1, 5, 1, 2, 5,
 		5, 2, 6, 2, 3, 6, 6, 3, 7
 	};
@@ -135,9 +138,9 @@ TEST_CASE("gpu_runPrimitiveAssembly should construct primitive.")
 	auto gpu = (GPU) 13;
 	GPUPrimitive primitive;
 	primitive.nofUsedVertices = 0;
-	size_t const nofPrimitiveVertices = 3;
+	const size_t nofPrimitiveVertices = 3;
 	GPUVertexPullerConfiguration puller;
-	VertexIndex const indices[8] = {0, 0, 0, 0, 0, 3, 12, 31};
+	const VertexIndex indices[8] = {0, 0, 0, 0, 0, 3, 12, 31};
 	puller.indices = indices;
 	puller.heads[0].buffer = (void *) 123;
 	puller.heads[0].stride = 32;
@@ -155,7 +158,7 @@ TEST_CASE("gpu_runPrimitiveAssembly should construct primitive.")
 		puller.heads[a].enabled = 0;
 	}
 
-	VertexShaderInvocation const baseInvocation = 5;
+	const VertexShaderInvocation baseInvocation = 5;
 	vsInvocationCounter = 0;
 
 	gpu_runPrimitiveAssembly(
@@ -298,7 +301,7 @@ TEST_CASE(
 	cpu_useProgram(gpu, prg);
 
 	// get puller configuration
-	GPUVertexPullerConfiguration const *const pullerConf =
+	const GPUVertexPullerConfiguration *const pullerConf =
 		gpu_getActiveVertexPuller(gpu);
 
 	// set puller output
@@ -322,8 +325,8 @@ TEST_CASE(
 	REQUIRE(equalFloats(outputVertex.gl_Position.data[2], 2.3828723431e+00f));
 	REQUIRE(equalFloats(outputVertex.gl_Position.data[3], 4.3761134148e+00f));
 
-	Vec3 const *const position = (Vec3 *) outputVertex.attributes[0];
-	Vec3 const *const normal = (Vec3 *) outputVertex.attributes[1];
+	const Vec3 *const position = (Vec3 *) outputVertex.attributes[0];
+	const Vec3 *const normal = (Vec3 *) outputVertex.attributes[1];
 
 	REQUIRE(position->data[0] == 10.f);
 	REQUIRE(position->data[1] == 10.f);
@@ -349,7 +352,9 @@ TEST_CASE("phong_fragmentShader should compute phong color.")
 		gpu, getUniformLocation(gpu, "cameraPosition"), 0.f, 20.f,
 		20.f
 	);
-	cpu_uniform3f(gpu, getUniformLocation(gpu, "lightPosition"), 0.f, 100.f, 0.f);
+	cpu_uniform3f(
+		gpu, getUniformLocation(gpu, "lightPosition"), 0.f, 100.f, 0.f
+	);
 
 	// create program
 	ProgramID prg = cpu_createProgram(gpu);
@@ -366,8 +371,13 @@ TEST_CASE("phong_fragmentShader should compute phong color.")
 	GPUFragmentShaderInput inputFragment;
 	inputFragment.coords.data[0] = 10.f;
 	inputFragment.coords.data[1] = 10.f;
-	init_Vec3((Vec3 *) inputFragment.attributes.attributes[0], 10.f, 10.f, 10.f);
-	init_Vec3((Vec3 *) inputFragment.attributes.attributes[1], 0.7071067811865476f, 0.7071067811865476f, 0.f);
+	init_Vec3(
+		(Vec3 *) inputFragment.attributes.attributes[0], 10.f, 10.f, 10.f
+	);
+	init_Vec3(
+		(Vec3 *) inputFragment.attributes.attributes[1],
+		0.7071067811865476f, 0.7071067811865476f, 0.f
+	);
 	inputFragment.depth = 0.f;
 
 	// init output fragment
@@ -377,10 +387,14 @@ TEST_CASE("phong_fragmentShader should compute phong color.")
 	// run fragment shader
 	phong_fragmentShader(&outputFragment, &inputFragment, gpu);
 
-	//std::cout << std::scientific << std::setprecision(10) << outputFragment.color.data[0] << std::endl;
-	//std::cout << std::scientific << std::setprecision(10) << outputFragment.color.data[1] << std::endl;
-	//std::cout << std::scientific << std::setprecision(10) << outputFragment.color.data[2] << std::endl;
-	//std::cout << std::scientific << std::setprecision(10) << outputFragment.color.data[3] << std::endl;
+//	std::cout << std::scientific << std::setprecision(10)
+//		<< outputFragment.color.data[0] << std::endl;
+//	std::cout << std::scientific << std::setprecision(10)
+//		<< outputFragment.color.data[1] << std::endl;
+//	std::cout << std::scientific << std::setprecision(10)
+//		<< outputFragment.color.data[2] << std::endl;
+//	std::cout << std::scientific << std::setprecision(10)
+//		<< outputFragment.color.data[3] << std::endl;
 
 	REQUIRE(equalFloats(outputFragment.color.data[0], 3.1046023965e-01f));
 	REQUIRE(equalFloats(outputFragment.color.data[1], 6.2092041969e-01f));
@@ -395,7 +409,7 @@ TEST_CASE("Application should render correct image.")
 {
 	int32_t windowWidth = 500;
 	int32_t windowHeight = 500;
-	char const *applicationName = "izgProjekt2017 performance test";
+	const char *applicationName = "izgProjekt2017 performance test";
 
 	// enable logging
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
@@ -505,11 +519,13 @@ TEST_CASE("Application should render correct image.")
 			{
 				for (int32_t c = 0; c < 3; ++c)
 				{
-					float diff = fabsf(
-						(float) ((uint8_t *) surface->pixels)[(y * surface->w + x) * 4 + c] -
-							(float) ((uint8_t *) groundTruth
-								->pixels)[(y * groundTruth->w + x) * 3 + c]
-					);
+					float a = ((uint8_t *) surface->pixels)[
+						(y * surface->w + x) * 4 + c
+					];
+					float b = ((uint8_t *) groundTruth->pixels)[
+						(y * groundTruth->w + x) * 3 + c
+					];
+					float diff = fabsf(a - b);
 					diff *= diff;
 					meanSquareError += diff;
 				}
@@ -536,7 +552,7 @@ TEST_CASE("SOLUTION_TEST: gpu_computeGLVertexID should compute gl_VertexID")
 {
 	WHEN(" using indexing")
 	{
-		VertexIndex const ind[] = {3, 10, 20, 20, 10, 30};
+		const VertexIndex ind[] = {3, 10, 20, 20, 10, 30};
 		REQUIRE(gpu_computeGLVertexID(ind, 0) == 3);
 		REQUIRE(gpu_computeGLVertexID(ind, 1) == 10);
 		REQUIRE(gpu_computeGLVertexID(ind, 2) == 20);
@@ -565,7 +581,9 @@ TEST_CASE(
 	head.stride = 21;
 	head.enabled = 1;
 	head.buffer = (void *) 110;
-	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 666) == 14196);
+	REQUIRE(
+		(size_t) gpu_computeVertexAttributeDataPointer(&head, 666) == 14196
+	);
 	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 100) == 2310);
 	head.offset = 10;
 	head.stride = 1;
@@ -579,7 +597,7 @@ TEST_CASE(
 TEST_CASE("SOLUTION_TEST: gpu_runVertexPuller should construct vertex")
 {
 	GPUVertexPullerConfiguration puller;
-	VertexIndex const i[] = {
+	const VertexIndex i[] = {
 		1, 2, 3, 4, 3, 2, 1, 4, 5,
 		6, 7, 8, 12, 11, 3, 4, 1, 7
 	};
@@ -626,7 +644,7 @@ TEST_CASE(
 	primitive.nofUsedVertices = 0;
 	size_t nofPrimitiveVertices = 3;
 	GPUVertexPullerConfiguration puller;
-	VertexIndex const indices[8] = {1, 3, 2, 1, 2, 4, 5, 100};
+	const VertexIndex indices[8] = {1, 3, 2, 1, 2, 4, 5, 100};
 	puller.indices = indices;
 	puller.heads[0].buffer = (void *) 1000;
 	puller.heads[0].stride = 100;
@@ -819,7 +837,7 @@ TEST_CASE(
 	cpu_useProgram(gpu, prg);
 
 	// get puller configuration
-	GPUVertexPullerConfiguration const *const pullerConf =
+	const GPUVertexPullerConfiguration *const pullerConf =
 		gpu_getActiveVertexPuller(gpu);
 
 	// set puller output
@@ -843,8 +861,8 @@ TEST_CASE(
 	REQUIRE(equalFloats(outputVertex.gl_Position.data[2], -1.0220220184e+02f));
 	REQUIRE(equalFloats(outputVertex.gl_Position.data[3], -1.0000000000e+02f));
 
-	Vec3 const *const position = (Vec3 *) outputVertex.attributes[0];
-	Vec3 const *const normal = (Vec3 *) outputVertex.attributes[1];
+	const Vec3 *const position = (Vec3 *) outputVertex.attributes[0];
+	const Vec3 *const normal = (Vec3 *) outputVertex.attributes[1];
 
 	REQUIRE(position->data[0] == 10.f);
 	REQUIRE(position->data[1] == 1.f);
@@ -870,7 +888,9 @@ TEST_CASE("SOLUTION_TEST: phong_fragmentShader should compute phong color.")
 		gpu, getUniformLocation(gpu, "cameraPosition"), 0.f, 20.f,
 		20.f
 	);
-	cpu_uniform3f(gpu, getUniformLocation(gpu, "lightPosition"), 0.f, 100.f, 0.f);
+	cpu_uniform3f(
+		gpu, getUniformLocation(gpu, "lightPosition"), 0.f, 100.f, 0.f
+	);
 
 	// create program
 	ProgramID prg = cpu_createProgram(gpu);
@@ -916,11 +936,11 @@ TEST_CASE("SOLUTION_TEST: phong_fragmentShader should compute phong color.")
 #endif // defined(SOLUTION)
 
 
-void runConformanceTests(char const *gtFile)
+void runConformanceTests(const char *gtFile)
 {
 	groundTruthFile = gtFile;
 	int argc = 1;
-	char const *argv[] = {"test"};
+	const char *argv[] = {"test"};
 	int result = Catch::Session().run(argc, argv);
 	std::cout << "NUMBER OF FAILED TESTS: " << result << std::endl;
 }

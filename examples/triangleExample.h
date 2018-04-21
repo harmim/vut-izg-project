@@ -3,6 +3,7 @@
  * @brief This file contains function declarations for simple triangle example.
  *
  * @author Tomáš Milet, imilet@fit.vutbr.cz
+ * @author Dominik Harmim <harmim6@gmail.com>
  */
 
 
@@ -25,12 +26,10 @@ extern "C" {
  */
 void triangleExample_onInit(int32_t width, int32_t height);
 
-
 /**
  * @brief This function is called at end of application.
  */
 void triangleExample_onExit();
-
 
 /**
  * @brief This function is called every frame and is responsible for drawing.

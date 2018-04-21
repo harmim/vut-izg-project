@@ -15,7 +15,7 @@ void runPerformanceTest()
 {
 	int32_t windowWidth = 500;
 	int32_t windowHeight = 500;
-	char const *applicationName = "izgProjekt2017 performance test";
+	const char *applicationName = "izgProjekt2017 performance test";
 
 	// enable logging
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
@@ -102,16 +102,16 @@ void runPerformanceTest()
 
 	SDL_LockSurface(surface);
 
-	size_t const framesPerMeasurement = 10;
+	const size_t framesPerMeasurement = 10;
 	auto start = std::chrono::high_resolution_clock::now();
 	for (size_t i = 0; i < framesPerMeasurement; ++i)
 	{ phong_onDraw(surface); }
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<float> elapsed = end - start;
-	float const time = elapsed.count() / float(framesPerMeasurement);
+	const float time = elapsed.count() / float(framesPerMeasurement);
 
-	std::cout << "Seconds per frame: " << std::scientific << std::setprecision(10)
-		<< time << std::endl;
+	std::cout << "Seconds per frame: " << std::scientific
+		<< std::setprecision(10) << time << std::endl;
 
 	SDL_UnlockSurface(surface);
 	SDL_UpdateWindowSurface(window);

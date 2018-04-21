@@ -1,5 +1,6 @@
 /**
  * @author Tomáš Milet, imilet@fit.vutbr.cz
+ * @author Dominik Harmim <harmim6@gmail.com>
  *
  * This file contains implementation of simplyfied virtual GPU.
  * Students do not have to look here.
@@ -35,7 +36,7 @@
 
 
 template<typename TYPE>
-std::string fceArgError2Str(TYPE const &value, std::string const &fceName)
+std::string fceArgError2Str(const TYPE &value, const std::string &fceName)
 {
 	std::stringstream ss;
 	ss << "ERROR: " << fceName << "(..., " << value << ", ...) failed: ";
@@ -44,7 +45,7 @@ std::string fceArgError2Str(TYPE const &value, std::string const &fceName)
 
 
 template<typename TYPE>
-std::string fceArgWarning2Str(TYPE const &value, std::string const &fceName)
+std::string fceArgWarning2Str(const TYPE &value, const std::string &fceName)
 {
 	std::stringstream ss;
 	ss << "WARNING: " << fceName << "(..., " << value << ", ...): ";
@@ -52,14 +53,14 @@ std::string fceArgWarning2Str(TYPE const &value, std::string const &fceName)
 }
 
 
-void printAttribIndexError(size_t attribIndex, std::string const &fceName)
+void printAttribIndexError(size_t attribIndex, const std::string &fceName)
 {
 	std::cerr << fceArgError2Str(attribIndex, fceName)
 		<< "attribute index cannot be >= " << MAX_ATTRIBUTES << std::endl;
 }
 
 
-std::string uniformType2Str(UniformType const &type)
+std::string uniformType2Str(const UniformType &type)
 {
 	switch (type)
 	{
@@ -81,7 +82,7 @@ std::string uniformType2Str(UniformType const &type)
 }
 
 
-std::string attribType2Str(AttributeType const &type)
+std::string attribType2Str(const AttributeType &type)
 {
 	switch (type)
 	{
@@ -108,7 +109,7 @@ public:
 	std::shared_ptr<uint8_t> data;
 
 
-	UniformImplementation(UniformType const &t, uint8_t *const &d)
+	UniformImplementation(const UniformType &t, uint8_t *const &d)
 		: type(t), data(
 		d, [](uint8_t *const &ptr)
 		{ delete[] ptr; }
@@ -126,7 +127,7 @@ using PullerAttribTuple = std::tuple<VertexPullerID, AttribIndex>;
 class PullerAttrib : PullerAttribTuple
 {
 public:
-	PullerAttrib(VertexPullerID const &puller, AttribIndex const &attrib)
+	PullerAttrib(const VertexPullerID &puller, const AttribIndex &attrib)
 		: PullerAttribTuple(puller, attrib)
 	{}
 
@@ -138,7 +139,7 @@ public:
 	};
 
 
-	bool operator<(PullerAttrib const &other) const
+	bool operator<(const PullerAttrib &other) const
 	{
 		if (std::get<PULLER>(*this) < std::get<PULLER>(other))
 		{ return true; }
@@ -173,8 +174,8 @@ class PullerReferences : PullerReferencesTuple
 {
 public:
 	PullerReferences(
-		BufferID const &indexBuffer = 0,
-		AttribBuffers const &attribBuffers = AttribBuffers{}
+		const BufferID &indexBuffer = 0,
+		const AttribBuffers &attribBuffers = AttribBuffers{}
 	)
 		: PullerReferencesTuple(indexBuffer, attribBuffers)
 	{}
@@ -187,13 +188,13 @@ public:
 	};
 
 
-	BufferID const &getIndexBuffer() const
+	const BufferID &getIndexBuffer() const
 	{
 		return std::get<INDEX_BUFFER>(*this);
 	}
 
 
-	AttribBuffers const &getAttribBuffers() const
+	const AttribBuffers &getAttribBuffers() const
 	{
 		return std::get<ATTRIB_BUFFERS>(*this);
 	}
@@ -211,19 +212,19 @@ public:
 	}
 
 
-	BufferID const &getAttribBuffer(AttribIndex const &index) const
+	const BufferID &getAttribBuffer(const AttribIndex &index) const
 	{
 		return this->getAttribBuffers().at(index);
 	}
 
 
-	BufferID &getAttribBuffer(AttribIndex const &index)
+	BufferID &getAttribBuffer(const AttribIndex &index)
 	{
 		return this->getAttribBuffers().at(index);
 	}
 
 
-	bool hasAttribBuffer(AttribIndex const &index) const
+	bool hasAttribBuffer(const AttribIndex &index) const
 	{
 		return this->getAttribBuffers().count(index) > 0;
 	}
@@ -239,8 +240,8 @@ class BufferReferences : BufferReferencesTuple
 {
 public:
 	BufferReferences(
-		PullerSet const &indexings = PullerSet{},
-		PullerAttribSet const &attribs = PullerAttribSet{}
+		const PullerSet &indexings = PullerSet{},
+		const PullerAttribSet &attribs = PullerAttribSet{}
 	)
 		: BufferReferencesTuple(indexings, attribs)
 	{}
@@ -253,13 +254,13 @@ public:
 	};
 
 
-	PullerSet const &getIndexings() const
+	const PullerSet &getIndexings() const
 	{
 		return std::get<INDEXING>(*this);
 	}
 
 
-	PullerAttribSet const &getAttribs() const
+	const PullerAttribSet &getAttribs() const
 	{
 		return std::get<ATTRIBS>(*this);
 	}
@@ -294,8 +295,8 @@ public:
 
 
 	AttribInterpolation(
-		AttributeType const &t = ATTRIB_EMPTY,
-		InterpolationType const &inter = SMOOTH
+		const AttributeType &t = ATTRIB_EMPTY,
+		const InterpolationType &inter = SMOOTH
 	)
 		: type(t), interpolation(inter)
 	{}
@@ -311,8 +312,8 @@ public:
 
 
 	ProgramSettings(
-		VertexShader const &vs = nullptr,
-		FragmentShader const &fs = nullptr
+		const VertexShader &vs = nullptr,
+		const FragmentShader &fs = nullptr
 	)
 		: vertexShader(vs), fragmentShader(fs)
 	{}
@@ -330,8 +331,8 @@ public:
 	{}
 
 
-	size_t static const EMPTY_BUFFER_ID = 0;
-	size_t static const EMPTY_VAO_ID = 0;
+	static const size_t EMPTY_BUFFER_ID = 0;
+	static const size_t EMPTY_VAO_ID = 0;
 
 	size_t viewportWidth = 0;
 	size_t viewportHeight = 0;
@@ -339,40 +340,42 @@ public:
 	std::vector<float> depthBuffer;
 	std::vector<Vec4> colorBuffer;
 
-	size_t static const outOfRange;
+	static const size_t outOfRange;
 
 
 	size_t getLinearPixelCoord(
-		size_t x, size_t y,
-		std::string const &fceName
+		size_t x, size_t y, const std::string &fceName
 	) const
 	{
-		size_t const w = ((size_t) this->viewportWidth);
-		size_t const h = ((size_t) this->viewportHeight);
+		const size_t w = ((size_t) this->viewportWidth);
+		const size_t h = ((size_t) this->viewportHeight);
 		if (x >= w)
 		{
-			std::cerr << fceArgError2Str(x, fceName) << "x coord is out of range: [0,"
-				<< w << ")" << std::endl;
+			std::cerr << fceArgError2Str(x, fceName)
+				<< "x coord is out of range: [0," << w << ")" << std::endl;
 			return outOfRange;
 		}
 		if (y >= h)
 		{
-			std::cerr << fceArgError2Str(y, fceName) << "y coord is out of range: [0,"
-				<< h << ")" << std::endl;
+			std::cerr << fceArgError2Str(y, fceName)
+				<< "y coord is out of range: [0," << h << ")" << std::endl;
 			return outOfRange;
 		}
 		return y * w + x;
 	}
 
 
-	std::map<BufferID, std::vector<uint8_t>> buffers;  // this holds gpu buffers
-	BufferID bufferCounter = 1;  // this holds number of already allocated buffers
+	// this holds gpu buffers
+	std::map<BufferID, std::vector<uint8_t>> buffers;
+	// this holds number of already allocated buffers
+	BufferID bufferCounter = 1;
 	// (even deleted), zero is reserved for empty
 	// buffer
 
 	std::map<VertexPullerID, GPUVertexPullerConfiguration>
 		vaos;            // this holds gpu vertex arrays
-	VertexPullerID vaoCounter = 1;  // this holds number of already allocated vaos
+	// this holds number of already allocated vaos
+	VertexPullerID vaoCounter = 1;
 	// (even deleted), zero is reserved for empty
 	// vao
 	VertexPullerID activeVao = 0;   // currently bound vao
@@ -399,7 +402,7 @@ public:
 	using programIterator = decltype(programs)::iterator;
 
 
-	bufferIterator getBuffer(BufferID const &id, std::string const &fceName)
+	bufferIterator getBuffer(const BufferID &id, const std::string &fceName)
 	{
 		auto bit = this->buffers.find(id);
 		if (bit == this->buffers.end())
@@ -413,7 +416,7 @@ public:
 	}
 
 
-	vaoIterator getVAO(VertexPullerID const &id, std::string const &fceName)
+	vaoIterator getVAO(const VertexPullerID &id, const std::string &fceName)
 	{
 		auto it = this->vaos.find(id);
 		if (it == this->vaos.end())
@@ -427,7 +430,7 @@ public:
 	}
 
 
-	programIterator getProgram(ProgramID const &id, std::string const &fceName)
+	programIterator getProgram(const ProgramID &id, const std::string &fceName)
 	{
 		auto it = this->programs.find(id);
 		if (it == this->programs.end())
@@ -442,9 +445,9 @@ public:
 
 
 	void setEnableVertexAttrib(
-		VertexPullerID const &puller,
-		size_t const &headIndex, bool const &enable,
-		std::string const &fceName
+		const VertexPullerID &puller,
+		const size_t &headIndex, const bool &enable,
+		const std::string &fceName
 	)
 	{
 		if (headIndex >= MAX_ATTRIBUTES)
@@ -462,7 +465,7 @@ public:
 };
 
 
-size_t const GpuImplementation::outOfRange = std::numeric_limits<size_t>::max();
+const size_t GpuImplementation::outOfRange = std::numeric_limits<size_t>::max();
 
 
 GPU cpu_createGPU()
@@ -477,7 +480,7 @@ void cpu_destroyGPU(GPU gpu)
 { delete static_cast<GpuImplementation *>(gpu); }
 
 
-size_t uniformSize(UniformType const &type)
+size_t uniformSize(const UniformType &type)
 {
 	switch (type)
 	{
@@ -500,8 +503,7 @@ size_t uniformSize(UniformType const &type)
 
 
 void cpu_reserveUniform(
-	GPU const gpu, char const *const name,
-	UniformType const type
+	const GPU gpu, const char *const name, const UniformType type
 )
 {
 	assert(gpu != nullptr);
@@ -525,7 +527,7 @@ void cpu_reserveUniform(
 }
 
 
-UniformLocation getUniformLocation(GPU const gpu, char const *const name)
+UniformLocation getUniformLocation(const GPU gpu, const char *const name)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -557,8 +559,7 @@ UniformLocation getUniformLocation(GPU const gpu, char const *const name)
 
 
 void cpu_uniform1f(
-	GPU const gpu, UniformLocation const location,
-	float const v0
+	const GPU gpu, const UniformLocation location, const float v0
 )
 {
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
@@ -567,8 +568,8 @@ void cpu_uniform1f(
 
 
 void cpu_uniform2f(
-	GPU const gpu, UniformLocation const location,
-	float const v0, float const v1
+	const GPU gpu, const UniformLocation location,
+	const float v0, const float v1
 )
 {
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
@@ -578,8 +579,8 @@ void cpu_uniform2f(
 
 
 void cpu_uniform3f(
-	GPU const gpu, UniformLocation const location,
-	float const v0, float const v1, float const v2
+	const GPU gpu, const UniformLocation location,
+	const float v0, const float v1, const float v2
 )
 {
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
@@ -590,9 +591,8 @@ void cpu_uniform3f(
 
 
 void cpu_uniform4f(
-	GPU const gpu, UniformLocation const location,
-	float const v0, float const v1, float const v2,
-	float const v3
+	const GPU gpu, const UniformLocation location,
+	const float v0, const float v1, const float v2, const float v3
 )
 {
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
@@ -604,8 +604,7 @@ void cpu_uniform4f(
 
 
 void cpu_uniformMatrix4fv(
-	GPU const gpu, UniformLocation const location,
-	float const *const data
+	const GPU gpu, const UniformLocation location, const float *const data
 )
 {
 	CPU_UNIFORM_UPLOAD_IMPLEMENTATION(float);
@@ -638,59 +637,54 @@ void cpu_uniformMatrix4fv(
   return reinterpret_cast<typeName const*>(&*u->uniforms.at(index).data)
 
 
-float const *shader_interpretUniformAsFloat(
-	Uniforms const uniforms,
-	UniformLocation const location
+const float *shader_interpretUniformAsFloat(
+	const Uniforms uniforms, const UniformLocation location
 )
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_FLOAT, float);
 }
 
 
-Vec2 const *shader_interpretUniformAsVec2(
-	Uniforms const uniforms,
-	UniformLocation const location
+const Vec2 *shader_interpretUniformAsVec2(
+	const Uniforms uniforms, const UniformLocation location
 )
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_VEC2, Vec2);
 }
 
 
-Vec3 const *shader_interpretUniformAsVec3(
-	Uniforms const uniforms,
-	UniformLocation const location
+const Vec3 *shader_interpretUniformAsVec3(
+	const Uniforms uniforms, const UniformLocation location
 )
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_VEC3, Vec3);
 }
 
 
-Vec4 const *shader_interpretUniformAsVec4(
-	Uniforms const uniforms,
-	UniformLocation const location
+const Vec4 *shader_interpretUniformAsVec4(
+	const Uniforms uniforms, const UniformLocation location
 )
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_VEC4, Vec4);
 }
 
 
-Mat4 const *shader_interpretUniformAsMat4(
-	Uniforms const uniforms,
-	UniformLocation const location
+const Mat4 *shader_interpretUniformAsMat4(
+	const Uniforms uniforms, const UniformLocation location
 )
 {
 	GPU_UNIFORM_DOWNLOAD_IMPLEMENTATION(UNIFORM_MAT4, Mat4);
 }
 
 
-void cpu_createBuffers(GPU const gpu, size_t const n, BufferID *const buffers)
+void cpu_createBuffers(const GPU gpu, const size_t n, BufferID *const buffers)
 {
 	assert(gpu != nullptr);
 	assert(buffers != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
 	for (size_t i = 0; i < n; ++i)
 	{
-		auto const currentId = g->bufferCounter + i;
+		const auto currentId = g->bufferCounter + i;
 		buffers[i] = currentId;
 		g->buffers[currentId] = std::vector<uint8_t>();
 		g->bufferReferences[currentId] = BufferReferences();
@@ -700,8 +694,8 @@ void cpu_createBuffers(GPU const gpu, size_t const n, BufferID *const buffers)
 
 
 void cpu_bufferData(
-	GPU const gpu, BufferID const buffer, size_t const size,
-	void const *const data
+	const GPU gpu, const BufferID buffer, const size_t size,
+	const void *const data
 )
 {
 	assert(gpu != nullptr);
@@ -710,7 +704,8 @@ void cpu_bufferData(
 	if (it == g->buffers.end())
 	{
 		std::cerr << fceArgError2Str(buffer, __func__);
-		std::cerr << "there is no such buffer, see cpu_createBuffers" << std::endl;
+		std::cerr
+			<< "there is no such buffer, see cpu_createBuffers" << std::endl;
 		return;
 	}
 	auto &buf = it->second;
@@ -718,13 +713,13 @@ void cpu_bufferData(
 	std::memcpy(buf.data(), data, size);
 
 	// update vertex arrays attrib pointers
-	auto const &bufferReferences = g->bufferReferences.at(buffer);
-	for (auto const &puller : bufferReferences.getIndexings())
+	const auto &bufferReferences = g->bufferReferences.at(buffer);
+	for (const auto &puller : bufferReferences.getIndexings())
 	{
-		g->vaos.at(puller).indices = (VertexIndex const *) buf.data();
+		g->vaos.at(puller).indices = (const VertexIndex *) buf.data();
 	}
 
-	for (auto const &pullerAttrib : bufferReferences.getAttribs())
+	for (const auto &pullerAttrib : bufferReferences.getAttribs())
 	{
 		g->vaos.at(pullerAttrib.getPuller())
 			.heads[pullerAttrib.getAttrib()]
@@ -734,8 +729,7 @@ void cpu_bufferData(
 
 
 void cpu_createVertexPullers(
-	GPU const gpu, size_t const n,
-	VertexPullerID *const arrays
+	const GPU gpu, const size_t n, VertexPullerID *const arrays
 )
 {
 	assert(gpu != nullptr);
@@ -743,7 +737,7 @@ void cpu_createVertexPullers(
 	auto g = static_cast<GpuImplementation *>(gpu);
 	for (size_t i = 0; i < n; ++i)
 	{
-		auto const currentId = g->vaoCounter + i;
+		const auto currentId = g->vaoCounter + i;
 		arrays[i] = currentId;
 		g->vaos[currentId] = GPUVertexPullerConfiguration{{}, nullptr};
 		for (size_t h = 0; h < MAX_ATTRIBUTES; ++h)
@@ -761,9 +755,9 @@ void cpu_createVertexPullers(
 
 
 void cpu_setVertexPullerHead(
-	GPU const gpu, VertexPullerID const puller,
-	size_t const attribIndex, BufferID const buffer,
-	size_t const offset, size_t const stride
+	const GPU gpu, const VertexPullerID puller,
+	const size_t attribIndex, const BufferID buffer,
+	const size_t offset, const size_t stride
 )
 {
 	assert(gpu != nullptr);
@@ -790,7 +784,7 @@ void cpu_setVertexPullerHead(
 	auto &pullerReferences = g->pullerReferences.at(puller);
 	if (pullerReferences.hasAttribBuffer(attribIndex))
 	{
-		auto const old = pullerReferences.getAttribBuffer(attribIndex);
+		const auto old = pullerReferences.getAttribBuffer(attribIndex);
 		g->bufferReferences.at(old).getAttribs().erase(
 			PullerAttrib(puller, attribIndex));
 	}
@@ -802,8 +796,8 @@ void cpu_setVertexPullerHead(
 
 
 void cpu_setIndexing(
-	GPU const gpu, VertexPullerID const puller,
-	BufferID const buffer, size_t const indexSize
+	const GPU gpu, const VertexPullerID puller,
+	const BufferID buffer, const size_t indexSize
 )
 {
 	assert(gpu != nullptr);
@@ -822,7 +816,7 @@ void cpu_setIndexing(
 	if (vaoIt == g->vaos.end())
 	{ return; }
 
-	void const *ptr = nullptr;
+	const void *ptr = nullptr;
 	if (buffer != GpuImplementation::EMPTY_BUFFER_ID)
 	{
 		auto bufferIt = g->getBuffer(buffer, __func__);
@@ -831,12 +825,12 @@ void cpu_setIndexing(
 		ptr = &*bufferIt->second.data();
 	}
 
-	vaoIt->second.indices = (VertexIndex const *) ptr;
+	vaoIt->second.indices = (const VertexIndex *) ptr;
 
 	auto &pullerReferences = g->pullerReferences.at(puller);
 	if (pullerReferences.getIndexBuffer() != GpuImplementation::EMPTY_BUFFER_ID)
 	{
-		auto const old = pullerReferences.getIndexBuffer();
+		const auto old = pullerReferences.getIndexBuffer();
 		g->bufferReferences.at(old).getIndexings().erase(puller);
 	}
 	pullerReferences.getIndexBuffer() = buffer;
@@ -845,8 +839,7 @@ void cpu_setIndexing(
 
 
 void cpu_enableVertexPullerHead(
-	GPU const gpu, VertexPullerID const puller,
-	size_t const attribIndex
+	const GPU gpu, const VertexPullerID puller, const size_t attribIndex
 )
 {
 	assert(gpu != nullptr);
@@ -856,8 +849,7 @@ void cpu_enableVertexPullerHead(
 
 
 void cpu_disableVertexPullerHead(
-	GPU const gpu, VertexPullerID const puller,
-	size_t const attribIndex
+	const GPU gpu, const VertexPullerID puller, const size_t attribIndex
 )
 {
 	assert(gpu != nullptr);
@@ -866,7 +858,7 @@ void cpu_disableVertexPullerHead(
 }
 
 
-void cpu_bindVertexPuller(GPU const gpu, VertexPullerID const id)
+void cpu_bindVertexPuller(const GPU gpu, const VertexPullerID id)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -879,7 +871,7 @@ void cpu_bindVertexPuller(GPU const gpu, VertexPullerID const id)
 }
 
 
-ProgramID cpu_createProgram(GPU const gpu)
+ProgramID cpu_createProgram(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -890,7 +882,7 @@ ProgramID cpu_createProgram(GPU const gpu)
 }
 
 
-void cpu_deleteProgram(GPU const gpu, ProgramID const program)
+void cpu_deleteProgram(const GPU gpu, const ProgramID program)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -902,8 +894,7 @@ void cpu_deleteProgram(GPU const gpu, ProgramID const program)
 
 
 void cpu_attachVertexShader(
-	GPU const gpu, ProgramID const program,
-	VertexShader const shader
+	const GPU gpu, const ProgramID program, const VertexShader shader
 )
 {
 	assert(gpu != nullptr);
@@ -916,8 +907,7 @@ void cpu_attachVertexShader(
 
 
 void cpu_attachFragmentShader(
-	GPU const gpu, ProgramID const program,
-	FragmentShader const shader
+	const GPU gpu, const ProgramID program, const FragmentShader shader
 )
 {
 	assert(gpu != nullptr);
@@ -929,7 +919,7 @@ void cpu_attachFragmentShader(
 }
 
 
-void cpu_useProgram(GPU const gpu, ProgramID const program)
+void cpu_useProgram(const GPU gpu, const ProgramID program)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -938,18 +928,20 @@ void cpu_useProgram(GPU const gpu, ProgramID const program)
 	{ return; }
 	g->activeProgram = program;
 
-	// extern Mat4 viewMatrix;
-	// extern Mat4 projectionMatrix;
-	// std::cout<<"viewMatrix:"<<std::endl;
-	// for(size_t i=0;i<16;++i)
-	//  std::cout<<std::showpos<<std::scientific<<std::setprecision(10)<<viewMatrix.column[i/4].data[i%4]<<"f"<<std::endl;
-	// std::cout<<"projectionMatrix:"<<std::endl;
-	// for(size_t i=0;i<16;++i)
-	//  std::cout<<std::showpos<<std::scientific<<std::setprecision(10)<<projectionMatrix.column[i/4].data[i%4]<<"f"<<std::endl;
+//	extern Mat4 viewMatrix;
+//	extern Mat4 projectionMatrix;
+//	std::cout << "viewMatrix:" << std::endl;
+//	for(size_t i=0;i<16;++i)
+//		std::cout << std::showpos << std::scientific << std::setprecision(10)
+//			<< viewMatrix.column[i / 4].data[i % 4] << "f" <<std::endl;
+//	std::cout << "projectionMatrix:" << std::endl;
+//	for(size_t i=0;i<16;++i)
+//		std::cout << std::showpos << std::scientific << std::setprecision(10)
+//			<< projectionMatrix.column[i / 4].data[i % 4] << "f" << std::endl;
 }
 
 
-Uniforms gpu_getUniformsHandle(GPU const gpu)
+Uniforms gpu_getUniformsHandle(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -958,21 +950,20 @@ Uniforms gpu_getUniformsHandle(GPU const gpu)
 
 
 void cpu_setViewportSize(
-	GPU const gpu, size_t const width,
-	size_t const height
+	const GPU gpu, const size_t width, const size_t height
 )
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
 	g->viewportWidth = width;
 	g->viewportHeight = height;
-	size_t const nofPixels = g->viewportWidth * g->viewportHeight;
+	const size_t nofPixels = g->viewportWidth * g->viewportHeight;
 	g->colorBuffer.resize(nofPixels);
 	g->depthBuffer.resize(nofPixels);
 }
 
 
-size_t gpu_getViewportWidth(GPU const gpu)
+size_t gpu_getViewportWidth(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -980,7 +971,7 @@ size_t gpu_getViewportWidth(GPU const gpu)
 }
 
 
-size_t gpu_getViewportHeight(GPU const gpu)
+size_t gpu_getViewportHeight(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -988,7 +979,7 @@ size_t gpu_getViewportHeight(GPU const gpu)
 }
 
 
-GPUVertexPullerConfiguration const *gpu_getActiveVertexPuller(GPU const gpu)
+const GPUVertexPullerConfiguration *gpu_getActiveVertexPuller(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -999,7 +990,7 @@ GPUVertexPullerConfiguration const *gpu_getActiveVertexPuller(GPU const gpu)
 }
 
 
-VertexShader gpu_getActiveVertexShader(GPU const gpu)
+VertexShader gpu_getActiveVertexShader(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -1010,7 +1001,7 @@ VertexShader gpu_getActiveVertexShader(GPU const gpu)
 }
 
 
-FragmentShader gpu_getActiveFragmentShader(GPU const gpu)
+FragmentShader gpu_getActiveFragmentShader(const GPU gpu)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -1021,7 +1012,7 @@ FragmentShader gpu_getActiveFragmentShader(GPU const gpu)
 }
 
 
-void cpu_clearColor(GPU const gpu, Vec4 const *const color)
+void cpu_clearColor(const GPU gpu, const Vec4 *const color)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -1030,7 +1021,7 @@ void cpu_clearColor(GPU const gpu, Vec4 const *const color)
 }
 
 
-void cpu_clearDepth(GPU const gpu, float const depth)
+void cpu_clearDepth(const GPU gpu, const float depth)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -1039,7 +1030,7 @@ void cpu_clearDepth(GPU const gpu, float const depth)
 }
 
 
-Vec4 const *cpu_getColor(GPU const gpu, size_t const x, size_t const y)
+const Vec4 *cpu_getColor(const GPU gpu, const size_t x, const size_t y)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -1050,7 +1041,7 @@ Vec4 const *cpu_getColor(GPU const gpu, size_t const x, size_t const y)
 }
 
 
-float gpu_getDepth(GPU const gpu, size_t const x, size_t const y)
+float gpu_getDepth(const GPU gpu, const size_t x, const size_t y)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
@@ -1062,8 +1053,7 @@ float gpu_getDepth(GPU const gpu, size_t const x, size_t const y)
 
 
 void gpu_setDepth(
-	GPU const gpu, size_t const x, size_t const y,
-	float const depth
+	const GPU gpu, const size_t x, const size_t y, const float depth
 )
 {
 	assert(gpu != nullptr);
@@ -1076,8 +1066,7 @@ void gpu_setDepth(
 
 
 void gpu_setColor(
-	GPU const gpu, size_t const x, size_t const y,
-	Vec4 const *const color
+	const GPU gpu, const size_t x, const size_t y, const Vec4 *const color
 )
 {
 	assert(gpu != nullptr);
@@ -1090,10 +1079,10 @@ void gpu_setColor(
 
 
 void cpu_setAttributeInterpolation(
-	GPU const gpu, ProgramID const program,
-	size_t const attribIndex,
-	AttributeType const type,
-	InterpolationType const interpolation
+	const GPU gpu, const ProgramID program,
+	const size_t attribIndex,
+	const AttributeType type,
+	const InterpolationType interpolation
 )
 {
 	if (attribIndex >= MAX_ATTRIBUTES)
@@ -1112,8 +1101,7 @@ void cpu_setAttributeInterpolation(
 
 
 InterpolationType gpu_getAttributeInterpolation(
-	GPU const gpu,
-	size_t const attribIndex
+	const GPU gpu, const size_t attribIndex
 )
 {
 	if (attribIndex >= MAX_ATTRIBUTES)
@@ -1130,7 +1118,7 @@ InterpolationType gpu_getAttributeInterpolation(
 }
 
 
-AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
+AttributeType gpu_getAttributeType(const GPU gpu, const size_t attribIndex)
 {
 	if (attribIndex >= MAX_ATTRIBUTES)
 	{
@@ -1154,7 +1142,7 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
     return nullptr;                                                            \
   }                                                                            \
   auto       g            = (GpuImplementation*)gpu;                           \
-  auto const referencesIt = g->pullerReferences.find(g->activeVao);            \
+  const auto referencesIt = g->pullerReferences.find(g->activeVao);            \
   if (referencesIt == g->pullerReferences.end()) {                             \
     std::cerr << fceArgError2Str(attributeIndex, __func__)                     \
               << "active vertex puller: " << g->activeVao;                     \
@@ -1164,7 +1152,7 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
     exit(1);                                                                   \
     return nullptr;                                                            \
   }                                                                            \
-  auto const& references = referencesIt->second;                               \
+  const auto &references = referencesIt->second;                               \
   if (!references.hasAttribBuffer(attributeIndex)) {                           \
     std::cerr << fceArgError2Str(attributeIndex, __func__)                     \
               << "active vertex puller: " << g->activeVao;                     \
@@ -1173,7 +1161,7 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
     exit(1);                                                                   \
     return nullptr;                                                            \
   }                                                                            \
-  auto const buffer = references.getAttribBuffer(attributeIndex);              \
+  const auto buffer = references.getAttribBuffer(attributeIndex);              \
   if (buffer == GpuImplementation::EMPTY_BUFFER_ID) {                          \
     std::cerr << fceArgError2Str(attributeIndex, __func__)                     \
               << "vertex attribute: " << attributeIndex;                       \
@@ -1183,7 +1171,7 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
     exit(1);                                                                   \
     return nullptr;                                                            \
   }                                                                            \
-  auto const& data = g->buffers.at(buffer);                                    \
+  const auto &data = g->buffers.at(buffer);                                    \
   if (reinterpret_cast<uint8_t const*>(                                        \
           vertex->attributes->attributes[attributeIndex]) +                    \
           sizeof(TYPE) >                                                       \
@@ -1209,36 +1197,36 @@ AttributeType gpu_getAttributeType(GPU const gpu, size_t const attribIndex)
       vertex->attributes->attributes[attributeIndex])
 
 
-float const *vs_interpretInputVertexAttributeAsFloat(
-	GPU const gpu, GPUVertexShaderInput const *const vertex,
-	AttribIndex const attributeIndex
+const float *vs_interpretInputVertexAttributeAsFloat(
+	const GPU gpu, const GPUVertexShaderInput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(float);
 }
 
 
-Vec2 const *vs_interpretInputVertexAttributeAsVec2(
-	GPU const gpu, GPUVertexShaderInput const *const vertex,
-	AttribIndex const attributeIndex
+const Vec2 *vs_interpretInputVertexAttributeAsVec2(
+	const GPU gpu, const GPUVertexShaderInput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(Vec2);
 }
 
 
-Vec3 const *vs_interpretInputVertexAttributeAsVec3(
-	GPU const gpu, GPUVertexShaderInput const *const vertex,
-	AttribIndex const attributeIndex
+const Vec3 *vs_interpretInputVertexAttributeAsVec3(
+	const GPU gpu, const GPUVertexShaderInput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(Vec3);
 }
 
 
-Vec4 const *vs_interpretInputVertexAttributeAsVec4(
-	GPU const gpu, GPUVertexShaderInput const *const vertex,
-	AttribIndex const attributeIndex
+const Vec4 *vs_interpretInputVertexAttributeAsVec4(
+	const GPU gpu, const GPUVertexShaderInput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_VERTEX(Vec4);
@@ -1269,8 +1257,8 @@ Vec4 const *vs_interpretInputVertexAttributeAsVec4(
 
 
 float *vs_interpretOutputVertexAttributeAsFloat(
-	GPU const gpu, GPUVertexShaderOutput *const vertex,
-	AttribIndex const attributeIndex
+	const GPU gpu, GPUVertexShaderOutput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(float,
@@ -1279,8 +1267,8 @@ float *vs_interpretOutputVertexAttributeAsFloat(
 
 
 Vec2 *vs_interpretOutputVertexAttributeAsVec2(
-	GPU const gpu, GPUVertexShaderOutput *const vertex,
-	AttribIndex const attributeIndex
+	const GPU gpu, GPUVertexShaderOutput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(Vec2,
@@ -1289,8 +1277,8 @@ Vec2 *vs_interpretOutputVertexAttributeAsVec2(
 
 
 Vec3 *vs_interpretOutputVertexAttributeAsVec3(
-	GPU const gpu, GPUVertexShaderOutput *const vertex,
-	AttribIndex const attributeIndex
+	const GPU gpu, GPUVertexShaderOutput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(Vec3,
@@ -1299,8 +1287,8 @@ Vec3 *vs_interpretOutputVertexAttributeAsVec3(
 
 
 Vec4 *vs_interpretOutputVertexAttributeAsVec4(
-	GPU const gpu, GPUVertexShaderOutput *const vertex,
-	AttribIndex const attributeIndex
+	const GPU gpu, GPUVertexShaderOutput *const vertex,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_OUTPUT_VERTEX(Vec4,
@@ -1332,9 +1320,9 @@ Vec4 *vs_interpretOutputVertexAttributeAsVec4(
       fragment->attributes.attributes[attributeIndex])
 
 
-float const *fs_interpretInputAttributeAsFloat(
-	GPU const gpu, GPUFragmentShaderInput const *const fragment,
-	AttribIndex const attributeIndex
+const float *fs_interpretInputAttributeAsFloat(
+	const GPU gpu, const GPUFragmentShaderInput *const fragment,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(
@@ -1342,9 +1330,9 @@ float const *fs_interpretInputAttributeAsFloat(
 }
 
 
-Vec2 const *fs_interpretInputAttributeAsVec2(
-	GPU const gpu, GPUFragmentShaderInput const *const fragment,
-	AttribIndex const attributeIndex
+const Vec2 *fs_interpretInputAttributeAsVec2(
+	const GPU gpu, const GPUFragmentShaderInput *const fragment,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(Vec2,
@@ -1352,9 +1340,9 @@ Vec2 const *fs_interpretInputAttributeAsVec2(
 }
 
 
-Vec3 const *fs_interpretInputAttributeAsVec3(
-	GPU const gpu, GPUFragmentShaderInput const *const fragment,
-	AttribIndex const attributeIndex
+const Vec3 *fs_interpretInputAttributeAsVec3(
+	const GPU gpu, const GPUFragmentShaderInput *const fragment,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(Vec3,
@@ -1362,9 +1350,9 @@ Vec3 const *fs_interpretInputAttributeAsVec3(
 }
 
 
-Vec4 const *fs_interpretInputAttributeAsVec4(
-	GPU const gpu, GPUFragmentShaderInput const *const fragment,
-	AttribIndex const attributeIndex
+const Vec4 *fs_interpretInputAttributeAsVec4(
+	const GPU gpu, const GPUFragmentShaderInput *const fragment,
+	const AttribIndex attributeIndex
 )
 {
 	GPU_IMPLEMENTATION_OF_INTERPRETATION_OF_ATTRIB_OF_INPUT_FRAGMENT(Vec4,

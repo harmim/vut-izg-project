@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 
-void runConformanceTests(char const *groundTruth);
+void runConformanceTests(const char *groundTruth);
 
 
 #ifdef __cplusplus

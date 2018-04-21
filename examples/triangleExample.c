@@ -3,6 +3,7 @@
  * @brief This file contains implementation of simple triangle example.
  *
  * @author Tomáš Milet, imilet@fit.vutbr.cz
+ * @author Dominik Harmim <harmim6@gmail.com>
  */
 
 
@@ -54,8 +55,8 @@ struct TriangleExampleVariables
  */
 void triangleExample_vertexShader(
 	GPUVertexShaderOutput *const output,
-	GPUVertexShaderInput const *const input,
-	GPU const gpu
+	const GPUVertexShaderInput *const input,
+	const GPU gpu
 )
 {
 	assert(output != NULL);
@@ -64,37 +65,37 @@ void triangleExample_vertexShader(
 
 	//! [INTERPRET_UNIFORMS]
 	// get handle to all uniforms
-	Uniforms const uniformsHandle = gpu_getUniformsHandle(gpu);  // gpu
+	const Uniforms uniformsHandle = gpu_getUniformsHandle(gpu);  // gpu
 
 	// get uniform location of view matrix
-	UniformLocation const viewMatrixLocation =
+	const UniformLocation viewMatrixLocation =
 		getUniformLocation(
 			gpu,            // gpu handle
 			"viewMatrix"
 		);  // name of uniform variable
 
 	// get pointer to view matrix
-	Mat4 const *const view = shader_interpretUniformAsMat4(
+	const Mat4 *const view = shader_interpretUniformAsMat4(
 		uniformsHandle,       // handle to all uniforms
 		viewMatrixLocation
 	);  // location of view matrix
 
 	// get uniform location of projection matrix
-	UniformLocation const projectionMatrixLocation =
+	const UniformLocation projectionMatrixLocation =
 		getUniformLocation(
 			gpu,                  // gpu handle
 			"projectionMatrix"
 		);  // name of uniform variable
 
 	// get pointer to projection matrix
-	Mat4 const *const proj = shader_interpretUniformAsMat4(
+	const Mat4 *const proj = shader_interpretUniformAsMat4(
 		uniformsHandle,             // handle to all uniforms
 		projectionMatrixLocation
 	);  // location of projection matrix
 	//! [INTERPRET_UNIFORMS]
 
 	//! [INPUT_ATTRIBUTES]
-	Vec3 const *const position =
+	const Vec3 *const position =
 		vs_interpretInputVertexAttributeAsVec3(
 			gpu,    // gpu
 			input,  // input vertex
@@ -110,7 +111,8 @@ void triangleExample_vertexShader(
 	copy_Vec3Float_To_Vec4(&pos4, position, 1.f);
 
 	multiply_Mat4_Vec4(
-		&output->gl_Position,  // output - position of output vertex in clip-space
+		// output - position of output vertex// in clip-space
+		&output->gl_Position,
 		&mvp,                  // projection view matrix
 		&pos4
 	);                // position of vertex in world-space
@@ -143,8 +145,8 @@ void triangleExample_vertexShader(
  */
 void triangleExample_fragmentShader(
 	GPUFragmentShaderOutput *const output,
-	GPUFragmentShaderInput const *const input,
-	GPU const gpu
+	const GPUFragmentShaderInput *const input,
+	const GPU gpu
 )
 {
 	assert(output != NULL);
@@ -152,7 +154,7 @@ void triangleExample_fragmentShader(
 	assert(gpu != NULL);
 
 	//! [FS_ATTRIBUTE]
-	Vec3 const *colorAttribute =
+	const Vec3 *colorAttribute =
 		fs_interpretInputAttributeAsVec3(
 			gpu,    // gpu
 			input,  // input fragment
@@ -231,11 +233,11 @@ void triangleExample_onInit(int32_t width, int32_t height)
 	//! [BUFFER]
 	cpu_createBuffers(
 		triangleExample.gpu,         // gpu
-		1,                           // number of buffer ids that will be reserved
+		1,                        // number of buffer ids that will be reserved
 		&triangleExample.vertices
 	);  // pointer to buffer id variable
 
-	float const positions[9] = {
+	const float positions[9] = {
 		// vertex positions
 		-1.f, -1.f, +0.f,  // triangle vertex A
 		+1.f, -1.f, +0.f,  // triangle vertex B
@@ -290,10 +292,10 @@ void triangleExample_onDraw(SDL_Surface *surface)
 	assert(surface != NULL);
 
 	//! [CLEAR]
-	float const depth = (float) (+INFINITY);  // infinity depth
+	const float depth = (float) (+INFINITY);  // infinity depth
 	cpu_clearDepth(triangleExample.gpu, depth);
 
-	Vec4 const color = {{.1f, .1f, .1f, .1f}};  // dark gray color
+	const Vec4 color = {{.1f, .1f, .1f, .1f}};  // dark gray color
 	cpu_clearColor(triangleExample.gpu, &color);
 	//! [CLEAR]
 
@@ -310,7 +312,7 @@ void triangleExample_onDraw(SDL_Surface *surface)
 	);  // program id
 	//! [BIND_PULLER]
 	//! [SET_UNIFORMS]
-	UniformLocation const viewMatrixUniform =
+	const UniformLocation viewMatrixUniform =
 		getUniformLocation(
 			triangleExample.gpu,  // gpu
 			"viewMatrix"
@@ -322,7 +324,7 @@ void triangleExample_onDraw(SDL_Surface *surface)
 		(float *) &viewMatrix
 	);  // pointer to data
 
-	UniformLocation const projectionMatrixUniform =
+	const UniformLocation projectionMatrixUniform =
 		getUniformLocation(
 			triangleExample.gpu,  // gpu
 			"projectionMatrix"
