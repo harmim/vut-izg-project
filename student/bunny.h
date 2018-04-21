@@ -24,17 +24,15 @@ extern "C" {
  * @brief This structure represents vertex that contains only position and
  * normal.
  */
-struct BunnyVertex
+typedef struct BunnyVertex
 {
 	float position[3];  ///< position of vertex
 	float normal[3];    ///< normal of vertex
-};
-
-typedef struct BunnyVertex BunnyVertex; ///< shortcut
+} BunnyVertex;
 
 
 /// This variable contains vertices of Standford bunny.
-extern const struct BunnyVertex bunnyVertices[1048];
+extern const BunnyVertex bunnyVertices[1048];
 
 /// This variable contains Standford bunny indices.
 extern const VertexIndex bunnyIndices[2092][3];

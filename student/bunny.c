@@ -10,7 +10,7 @@
 #include <student/bunny.h>
 
 
-const struct BunnyVertex bunnyVertices[1048] = {
+const BunnyVertex bunnyVertices[1048] = {
 	{{-0.0856692f, 0.181792f, 0.157975f}, {-0.18915f, 0.919645f, 0.344203f}},
 	{{-0.0765208f, 0.17029f, 0.280939f}, {-0.459686f, 0.883795f, 0.087148f}},
 	{{-0.557871f, -0.00978303f, -0.492547f}, {-0.40337f, 0.0120249f, -0.914958f}},
