@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief This file contains global variables
+ * @brief This file contains global variables.
  *
  * @author Tomáš Milet, imilet@fit.vutbr.cz
  * @author Dominik Harmim <harmim6@gmail.com>

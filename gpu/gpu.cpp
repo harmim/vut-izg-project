@@ -949,9 +949,7 @@ Uniforms gpu_getUniformsHandle(const GPU gpu)
 }
 
 
-void cpu_setViewportSize(
-	const GPU gpu, const size_t width, const size_t height
-)
+void cpu_setViewportSize(const GPU gpu, const size_t width, const size_t height)
 {
 	assert(gpu != nullptr);
 	auto g = static_cast<GpuImplementation *>(gpu);
