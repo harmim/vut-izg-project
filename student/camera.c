@@ -73,8 +73,7 @@ void cpu_computeOrbitCamera(
 
 
 void cpu_getCameraPositionFromViewMatrix(
-	Vec3 *const cameraPosition,
-	const Mat4 *const viewMatrix
+	Vec3 *const cameraPosition, const Mat4 *const viewMatrix
 )
 {
 	assert(cameraPosition != NULL);
