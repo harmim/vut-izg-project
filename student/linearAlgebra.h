@@ -52,6 +52,7 @@ struct Mat4
 	Vec4 column[4];  ///< columns of matrix
 };
 
+
 /**
  * @brief This function sets vector to zero vector.
  *
