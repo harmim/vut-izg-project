@@ -163,7 +163,7 @@ TEST_CASE("gpu_runPrimitiveAssembly should construct primitive.")
 
 	gpu_runPrimitiveAssembly(
 		gpu, &primitive, nofPrimitiveVertices, &puller,
-		baseInvocation, vs_test
+		baseInvocation, static_cast<VertexShader const>(vs_test)
 	);
 
 	REQUIRE(vsInvocationCounter == 3);
@@ -291,7 +291,9 @@ TEST_CASE(
 
 	// create program
 	ProgramID prg = cpu_createProgram(gpu);
-	cpu_attachVertexShader(gpu, prg, phong_vertexShader);
+	cpu_attachVertexShader(
+		gpu, prg, static_cast<VertexShader>(phong_vertexShader)
+	);
 
 	// set interpolation
 	cpu_setAttributeInterpolation(gpu, prg, 0, ATTRIB_VEC3, SMOOTH);
@@ -358,7 +360,9 @@ TEST_CASE("phong_fragmentShader should compute phong color.")
 
 	// create program
 	ProgramID prg = cpu_createProgram(gpu);
-	cpu_attachFragmentShader(gpu, prg, phong_fragmentShader);
+	cpu_attachFragmentShader(
+		gpu, prg, static_cast<FragmentShader>(phong_fragmentShader)
+	);
 
 	// set interpolation
 	cpu_setAttributeInterpolation(gpu, prg, 0, ATTRIB_VEC3, SMOOTH);

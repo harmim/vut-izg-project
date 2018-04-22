@@ -71,27 +71,27 @@ void triangleExample_vertexShader(
 	const UniformLocation viewMatrixLocation =
 		getUniformLocation(
 			gpu,            // gpu handle
-			"viewMatrix"
-		);  // name of uniform variable
+			"viewMatrix"    // name of uniform variable
+		);
 
 	// get pointer to view matrix
 	const Mat4 *const view = shader_interpretUniformAsMat4(
 		uniformsHandle,       // handle to all uniforms
-		viewMatrixLocation
-	);  // location of view matrix
+		viewMatrixLocation    // location of view matrix
+	);
 
 	// get uniform location of projection matrix
 	const UniformLocation projectionMatrixLocation =
 		getUniformLocation(
 			gpu,                  // gpu handle
-			"projectionMatrix"
-		);  // name of uniform variable
+			"projectionMatrix"    // name of uniform variable
+		);
 
 	// get pointer to projection matrix
 	const Mat4 *const proj = shader_interpretUniformAsMat4(
 		uniformsHandle,             // handle to all uniforms
-		projectionMatrixLocation
-	);  // location of projection matrix
+		projectionMatrixLocation    // location of projection matrix
+	);
 	//! [INTERPRET_UNIFORMS]
 
 	//! [INPUT_ATTRIBUTES]
@@ -99,8 +99,8 @@ void triangleExample_vertexShader(
 		vs_interpretInputVertexAttributeAsVec3(
 			gpu,    // gpu
 			input,  // input vertex
-			0
-		);  // index of vertex attribute
+			0       // index of vertex attribute
+		);
 	//! [INPUT_ATTRIBUTES]
 
 	//! [PROJECT]
@@ -114,8 +114,8 @@ void triangleExample_vertexShader(
 		// output - position of output vertex// in clip-space
 		&output->gl_Position,
 		&mvp,                  // projection view matrix
-		&pos4
-	);                // position of vertex in world-space
+		&pos4                  // position of vertex in world-space
+	);
 	//! [PROJECT]
 
 	//! [VS_ATTRIBUTE]
@@ -123,12 +123,12 @@ void triangleExample_vertexShader(
 		vs_interpretOutputVertexAttributeAsVec3(
 			gpu,     // gpu
 			output,  // output vertex
-			0
-		);  // index of vertex attribute
+			0        // index of vertex attribute
+		);
 	//! [VS_ATTRIBUTE]
 	//! [VS_COLOR]
 	init_Vec3(
-		colorAttribute,                     // pointer to vertex attribute
+		colorAttribute,                      // pointer to vertex attribute
 		(float) (input->gl_VertexID == 0),   // zeroth vertex will be red
 		(float) (input->gl_VertexID == 1),   // first vertex will be green
 		(float) (input->gl_VertexID == 2));  // second vertex will be blue
@@ -158,16 +158,16 @@ void triangleExample_fragmentShader(
 		fs_interpretInputAttributeAsVec3(
 			gpu,    // gpu
 			input,  // input fragment
-			0
-		);     // index of fragment attribute
+			0       // index of fragment attribute
+		);
 	//! [FS_ATTRIBUTE]
 
 	//! [FS_COLOR]
 	copy_Vec3Float_To_Vec4(
 		&output->color,  // output fragment color
 		colorAttribute,  // computed color
-		1.f
-	);            // alpha
+		1.f              // alpha
+	);
 	//! [FS_COLOR]
 }
 
@@ -179,9 +179,9 @@ void triangleExample_onInit(int32_t width, int32_t height)
 
 	cpu_setViewportSize(
 		triangleExample.gpu,  // gpu
-		(size_t) width,        // width of screen/framebuffer in pixels
-		(size_t) height
-	);      // height of screen/framebuffer in pixels
+		(size_t) width,       // width of screen/framebuffer in pixels
+		(size_t) height       // height of screen/framebuffer in pixels
+	);
 
 	cpu_initMatrices(width, height);
 	//! [INITIALIZATION]
@@ -190,14 +190,14 @@ void triangleExample_onInit(int32_t width, int32_t height)
 	cpu_reserveUniform(
 		triangleExample.gpu,  // gpu
 		"projectionMatrix",   // uniform name
-		UNIFORM_MAT4
-	);        // uniform type
+		UNIFORM_MAT4          // uniform type
+	);
 
 	cpu_reserveUniform(
 		triangleExample.gpu,  // gpu
 		"viewMatrix",         // uniform name
-		UNIFORM_MAT4
-	);        // uniform type
+		UNIFORM_MAT4          // uniform type
+	);
 	//! [RESERVE]
 
 	//! [CREATE_PROGRAM]
@@ -205,18 +205,18 @@ void triangleExample_onInit(int32_t width, int32_t height)
 	//! [CREATE_PROGRAM]
 	//! [ATTACH]
 	cpu_attachVertexShader(
-		triangleExample.gpu,            // gpu
-		triangleExample.program,        // program id
-		triangleExample_vertexShader
-	);  // pointer to function
+		triangleExample.gpu,                        // gpu
+		triangleExample.program,                    // program id
+		(VertexShader) triangleExample_vertexShader // pointer to function
+	);
 	// that represents
 	// vertex shader
 
 	cpu_attachFragmentShader(
-		triangleExample.gpu,              // gpu
-		triangleExample.program,          // program id
-		triangleExample_fragmentShader
-	);  // pointer to
+		triangleExample.gpu,                            // gpu
+		triangleExample.program,                        // program id
+		(FragmentShader) triangleExample_fragmentShader // pointer to
+	);
 	// function that
 	// represents
 	// fragment shader
@@ -226,16 +226,17 @@ void triangleExample_onInit(int32_t width, int32_t height)
 		triangleExample.gpu,      // gpu
 		triangleExample.program,  // program id
 		0,                        // vertex attribute index
-		ATTRIB_VEC3, SMOOTH
-	);  // interpolation type - with perspective correction
+		ATTRIB_VEC3,
+		SMOOTH       // interpolation type - with perspective correction
+	);
 	//! [INTERPOLATION]
 
 	//! [BUFFER]
 	cpu_createBuffers(
-		triangleExample.gpu,         // gpu
+		triangleExample.gpu,      // gpu
 		1,                        // number of buffer ids that will be reserved
-		&triangleExample.vertices
-	);  // pointer to buffer id variable
+		&triangleExample.vertices // pointer to buffer id variable
+	);
 
 	const float positions[9] = {
 		// vertex positions
@@ -245,19 +246,19 @@ void triangleExample_onInit(int32_t width, int32_t height)
 	};
 
 	cpu_bufferData(
-		triangleExample.gpu,       // gpu
-		triangleExample.vertices,  // buffer id
-		sizeof(float) * 9,  // size of data that is going to be copied to buffer
-		positions
-	);         // pointer to data
+		triangleExample.gpu,      // gpu
+		triangleExample.vertices, // buffer id
+		sizeof(float) * 9,        // size of data that is going to be copied to buffer
+		positions                 // pointer to data
+	);
 	//! [BUFFER]
 
 	//! [PULLER]
 	cpu_createVertexPullers(
 		triangleExample.gpu,       // gpu
 		1,                         // number of puller ids that will be reserved
-		&triangleExample.puller
-	);  // pointer to puller id variable
+		&triangleExample.puller    // pointer to puller id variable
+	);
 	//! [PULLER]
 
 	//! [HEAD]
@@ -267,14 +268,14 @@ void triangleExample_onInit(int32_t width, int32_t height)
 		0,                         // id of head/vertex attrib
 		triangleExample.vertices,  // buffer id
 		sizeof(float) * 0,         // offset
-		sizeof(float) * 3
-	);        // stride
+		sizeof(float) * 3         // stride
+	);
 
 	cpu_enableVertexPullerHead(
 		triangleExample.gpu,     // gpu
 		triangleExample.puller,  // puller id
-		0
-	);  // id of head/vertex attrib
+		0                        // id of head/vertex attrib
+	);
 	//! [HEAD]
 }
 
@@ -302,46 +303,46 @@ void triangleExample_onDraw(SDL_Surface *surface)
 	//! [USE_PROGRAM]
 	cpu_useProgram(
 		triangleExample.gpu,       // gpu
-		triangleExample.program
-	);  // program id
+		triangleExample.program    // program id
+	);
 	//! [USE_PROGRAM]
 	//! [BIND_PULLER]
 	cpu_bindVertexPuller(
 		triangleExample.gpu,      // gpu
-		triangleExample.puller
-	);  // program id
+		triangleExample.puller    // program id
+	);
 	//! [BIND_PULLER]
 	//! [SET_UNIFORMS]
 	const UniformLocation viewMatrixUniform =
 		getUniformLocation(
 			triangleExample.gpu,  // gpu
-			"viewMatrix"
-		);        // name of uniform variable
+			"viewMatrix"          // name of uniform variable
+		);
 
 	cpu_uniformMatrix4fv(
 		triangleExample.gpu,    // gpu
 		viewMatrixUniform,      // location of uniform variable
-		(float *) &viewMatrix
-	);  // pointer to data
+		(float *) &viewMatrix   // pointer to data
+	);
 
 	const UniformLocation projectionMatrixUniform =
 		getUniformLocation(
 			triangleExample.gpu,  // gpu
-			"projectionMatrix"
-		);  // name of uniform variable
+			"projectionMatrix"    // name of uniform variable
+		);
 
 	cpu_uniformMatrix4fv(
-		triangleExample.gpu,      // gpu
-		projectionMatrixUniform,  // location of uniform variable
-		(float *) &projectionMatrix
-	);  // pointer to data of
+		triangleExample.gpu,        // gpu
+		projectionMatrixUniform,    // location of uniform variable
+		(float *) &projectionMatrix // pointer to data of
+	);
 	//! [SET_UNIFORMS]
 
 	//! [DRAW]
 	cpu_drawTriangles(
 		triangleExample.gpu,  // gpu
-		3
-	);                   // number of vertices
+		3                     // number of vertices
+	);
 	//! [DRAW]
 
 	//! [SWAP]
