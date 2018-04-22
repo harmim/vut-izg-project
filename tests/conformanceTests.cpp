@@ -402,7 +402,7 @@ TEST_CASE("phong_fragmentShader should compute phong color.")
 	REQUIRE(equalFloats(outputFragment.color.data[3], 1.0000000000e+00f));
 }
 
-#endif  // !defined(SOLUTION)
+#endif // !defined(SOLUTION)
 
 
 TEST_CASE("Application should render correct image.")
