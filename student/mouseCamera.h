@@ -13,8 +13,6 @@
 
 #include <stdint.h>
 
-#include <student/linearAlgebra.h>
-
 
 #ifdef __cplusplus
 extern "C" {

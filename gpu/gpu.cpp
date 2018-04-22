@@ -9,9 +9,7 @@
 
 #include <array>
 #include <cassert>
-#include <chrono>
 #include <cstring>
-#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -21,11 +19,11 @@
 #include <tuple>
 #include <vector>
 
+#include <student/fwd.h>
 #include <student/buffer.h>
 #include <student/gpu.h>
 #include <student/linearAlgebra.h>
 #include <student/program.h>
-#include <student/student_pipeline.h>
 #include <student/uniforms.h>
 #include <student/vertexPuller.h>
 

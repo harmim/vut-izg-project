@@ -10,6 +10,7 @@
 #pragma once
 
 
+#include <student/fwd.h>
 #include <student/linearAlgebra.h>
 
 

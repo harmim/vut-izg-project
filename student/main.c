@@ -11,13 +11,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <examples/triangleExample.h>
-#include <student/fwd.h>
-#include <student/linearAlgebra.h>
 #include <student/mouseCamera.h>
 #include <student/student_cpu.h>
-#include <student/globals.h>
 #include <tests/conformanceTests.h>
 #include <tests/performanceTest.h>
 

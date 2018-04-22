@@ -12,14 +12,13 @@
 
 #include <examples/triangleExample.h>
 #include <student/buffer.h>
-#include <student/camera.h>
 #include <student/gpu.h>
 #include <student/linearAlgebra.h>
 #include <student/mouseCamera.h>
 #include <student/student_pipeline.h>
-#include <student/student_shader.h>
 #include <student/swapBuffers.h>
 #include <student/uniforms.h>
+#include <student/program.h>
 #include <student/vertexPuller.h>
 
 

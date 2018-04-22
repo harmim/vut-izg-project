@@ -1,16 +1,17 @@
 #include <iostream>
 
 #include <tests/conformanceTests.h>
+#include <student/gpu.h>
 #include <student/camera.h>
 #include <student/linearAlgebra.h>
-#include <student/mouseCamera.h>
+#include <student/buffer.h>
 #include <student/program.h>
+#include <student/vertexPuller.h>
 #include <student/student_cpu.h>
 #include <student/student_pipeline.h>
 #include <student/student_shader.h>
 #include <student/uniforms.h>
 #include <student/globals.h>
-
 
 #define CATCH_CONFIG_RUNNER
 #include <3rdParty/catch.hpp>

@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include <student/linearAlgebra.h>
+#include <student/camera.h>
 
 
 void frustum_Mat4(

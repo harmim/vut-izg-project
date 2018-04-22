@@ -11,6 +11,7 @@
 
 
 #include <SDL2/SDL.h>
+#include <stdint.h>
 
 
 #ifdef __cplusplus

@@ -1,12 +1,9 @@
-#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
-#include <vector>
+#include <SDL2/SDL.h>
 
 #include <tests/performanceTest.h>
-#include <student/linearAlgebra.h>
-#include <student/mouseCamera.h>
 #include <student/student_cpu.h>
 #include <student/globals.h>
 

@@ -10,7 +10,11 @@
 #pragma once
 
 
+#include <stdlib.h>
+
 #include <student/fwd.h>
+#include <student/linearAlgebra.h>
+#include <student/vertexPuller.h>
 #include <student/program.h>
 
 

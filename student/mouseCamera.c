@@ -12,7 +12,6 @@
 
 #include <student/camera.h>
 #include <student/fwd.h>
-#include <student/linearAlgebra.h>
 #include <student/mouseCamera.h>
 #include <student/globals.h>
 
