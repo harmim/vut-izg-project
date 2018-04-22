@@ -11,8 +11,8 @@
 
 
 #include <stdint.h>
-
 #include <SDL2/SDL.h>
+
 #include <student/fwd.h>
 
 

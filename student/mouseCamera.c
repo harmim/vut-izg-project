@@ -9,6 +9,7 @@
 
 
 #include <SDL2/SDL.h>
+
 #include <student/camera.h>
 #include <student/fwd.h>
 #include <student/linearAlgebra.h>
