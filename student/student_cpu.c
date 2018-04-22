@@ -29,7 +29,7 @@
 /**
  * @brief This structure contains all global variables for this method.
  */
-struct PhongVariables
+static struct PhongVariables
 {
 	/// This variable contains GPU handle.
 	GPU gpu;

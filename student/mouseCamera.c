@@ -17,31 +17,31 @@
 
 
 /// This variable contains 1 if left mouse button was pressed.
-int leftMouseButtonDown = 0;
+static int leftMouseButtonDown = 0;
 /// This variable contains 1 if right mouse button was pressed.
-int rightMouseButtonDown = 0;
+static int rightMouseButtonDown = 0;
 /// This varible contains 1 if middle mouse button was pressed.
-int middleMouseButtonDown = 0;
+static int middleMouseButtonDown = 0;
 /// This variable contains orbit camera angle X.
-float cameraAngleX = 0.f;
+static float cameraAngleX = 0.f;
 /// This variable contains orbit camera angle Y.
-float cameraAngleY = 0.f;
+static float cameraAngleY = 0.f;
 /// This variable contains orbit camera distance.
-float cameraDistance = 3.f;
+static float cameraDistance = 3.f;
 /// This variable contains sensitivity of mouse.
-const float cameraSensitivity = 0.01f;
+static const float cameraSensitivity = 0.01f;
 /// This variable contains zooming speed.
-const float cameraZoomSpeed = 0.04f;
+static const float cameraZoomSpeed = 0.04f;
 /// This variable contains minimal allowed distance of orbit camera.
-const float cameraMinDistance = 1.f;
+static const float cameraMinDistance = 1.f;
 /// This variable contains maximal allowed distance of orbit camera.
-const float cameraMaxDistance = 100.f;
+static const float cameraMaxDistance = 100.f;
 /// This variable contains distance to near plane.
-const float cameraNear = 0.1f;
+static const float cameraNear = 0.1f;
 /// This variable contains distance to far plane.
-const float cameraFar = 10000.f;
+static const float cameraFar = 10000.f;
 /// This variable contains field of view in y axis.
-const float cameraFovy = MY_PI / 2.f;
+static const float cameraFovy = MY_PI / 2.f;
 
 
 void onMouseMotion(int x, int y, int xrel, int yrel)
