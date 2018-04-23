@@ -58,8 +58,6 @@ void vs_test(
 }
 
 
-#if !defined(SOLUTION)
-
 TEST_CASE("gpu_computeGLVertexID should compute gl_VertexID.")
 {
 	WHEN(" using indexing")
@@ -84,6 +82,30 @@ TEST_CASE("gpu_computeGLVertexID should compute gl_VertexID.")
 }
 
 
+TEST_CASE("SOLUTION_TEST: gpu_computeGLVertexID should compute gl_VertexID")
+{
+	WHEN(" using indexing")
+	{
+		const VertexIndex ind[] = {3, 10, 20, 20, 10, 30};
+		REQUIRE(gpu_computeGLVertexID(ind, 0) == 3);
+		REQUIRE(gpu_computeGLVertexID(ind, 1) == 10);
+		REQUIRE(gpu_computeGLVertexID(ind, 2) == 20);
+		REQUIRE(gpu_computeGLVertexID(ind, 3) == 20);
+		REQUIRE(gpu_computeGLVertexID(ind, 4) == 10);
+		REQUIRE(gpu_computeGLVertexID(ind, 5) == 30);
+	}
+	WHEN(" not using indexing")
+	{
+		REQUIRE(gpu_computeGLVertexID(nullptr, 10) == 10);
+		REQUIRE(gpu_computeGLVertexID(nullptr, 11) == 11);
+		REQUIRE(gpu_computeGLVertexID(nullptr, 12) == 12);
+		REQUIRE(gpu_computeGLVertexID(nullptr, 13) == 13);
+		REQUIRE(gpu_computeGLVertexID(nullptr, 14) == 14);
+		REQUIRE(gpu_computeGLVertexID(nullptr, 15) == 15);
+	}
+}
+
+
 TEST_CASE(
 	"gpu_computeVertexAttributeDataPointer should compute data pointer for "
 	"vertex attribute.")
@@ -94,6 +116,28 @@ TEST_CASE(
 	head.enabled = 1;
 	head.buffer = (void *) 1000;
 	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 444) == 9893);
+}
+
+
+TEST_CASE(
+	"SOLUTION_TEST: gpu_computeVertexAttributeDataPointer should compute data "
+	"pointer")
+{
+	GPUVertexPullerHead head;
+	head.offset = 100;
+	head.stride = 21;
+	head.enabled = 1;
+	head.buffer = (void *) 110;
+	REQUIRE(
+		(size_t) gpu_computeVertexAttributeDataPointer(&head, 666) == 14196
+	);
+	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 100) == 2310);
+	head.offset = 10;
+	head.stride = 1;
+	head.enabled = 1;
+	head.buffer = (void *) 1;
+	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 0) == 11);
+	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 1) == 12);
 }
 
 
@@ -131,6 +175,48 @@ TEST_CASE(
 	REQUIRE((size_t) vertex.attributes[1] == 0);
 	REQUIRE((size_t) vertex.attributes[2] == 10682);
 	REQUIRE((size_t) vertex.attributes[3] == 1477);
+}
+
+
+TEST_CASE("SOLUTION_TEST: gpu_runVertexPuller should construct vertex")
+{
+	GPUVertexPullerConfiguration puller;
+	const VertexIndex i[] = {
+		1, 2, 3, 4, 3, 2, 1, 4, 5,
+		6, 7, 8, 12, 11, 3, 4, 1, 7
+	};
+	puller.indices = i;
+	for (auto &head : puller.heads)
+	{ head.enabled = 0; }
+	puller.heads[0].offset = 3;
+	puller.heads[0].stride = 2;
+	puller.heads[0].enabled = 1;
+	puller.heads[0].buffer = (void *) 10;
+
+	puller.heads[1].offset = 33;
+	puller.heads[1].stride = 13;
+	puller.heads[1].enabled = 1;
+	puller.heads[1].buffer = (void *) 1000;
+
+	puller.heads[3].offset = 5;
+	puller.heads[3].stride = 7;
+	puller.heads[3].enabled = 1;
+	puller.heads[3].buffer = (void *) 111;
+
+	GPUVertexPullerOutput vertex;
+
+	gpu_runVertexPuller(&vertex, &puller, 10);
+
+	REQUIRE((size_t) vertex.attributes[0] == 27);
+	REQUIRE((size_t) vertex.attributes[1] == 1124);
+	REQUIRE((size_t) vertex.attributes[2] == 0);
+	REQUIRE((size_t) vertex.attributes[3] == 165);
+
+	gpu_runVertexPuller(&vertex, &puller, 11);
+	REQUIRE((size_t) vertex.attributes[0] == 29);
+	REQUIRE((size_t) vertex.attributes[1] == 1137);
+	REQUIRE((size_t) vertex.attributes[2] == 0);
+	REQUIRE((size_t) vertex.attributes[3] == 172);
 }
 
 
@@ -195,6 +281,101 @@ TEST_CASE("gpu_runPrimitiveAssembly should construct primitive.")
 
 
 TEST_CASE(
+	"SOLUTION_TEST: gpu_runPrimitiveAssembly should construct primitive")
+{
+	auto gpu = (GPU) 17;
+	GPUPrimitive primitive;
+	primitive.nofUsedVertices = 0;
+	size_t nofPrimitiveVertices = 3;
+	GPUVertexPullerConfiguration puller;
+	const VertexIndex indices[8] = {1, 3, 2, 1, 2, 4, 5, 100};
+	puller.indices = indices;
+	puller.heads[0].buffer = (void *) 1000;
+	puller.heads[0].stride = 100;
+	puller.heads[0].offset = 1000;
+	puller.heads[0].enabled = 1;
+	puller.heads[1].buffer = (void *) 100;
+	puller.heads[1].stride = 10;
+	puller.heads[1].offset = 10;
+	puller.heads[1].enabled = 1;
+	for (size_t i = 2; i < MAX_ATTRIBUTES; ++i)
+	{
+		puller.heads[i].buffer = (void *) nullptr;
+		puller.heads[i].stride = 0;
+		puller.heads[i].offset = 0;
+		puller.heads[i].enabled = 0;
+	}
+
+	VertexShaderInvocation baseInvocation = 0;
+	vsInvocationCounter = 0;
+
+	gpu_runPrimitiveAssembly(
+		gpu, &primitive, nofPrimitiveVertices, &puller,
+		baseInvocation, static_cast<VertexShader const>(vs_test)
+	);
+
+	REQUIRE(vsInvocationCounter == 3);
+	REQUIRE(primitive.nofUsedVertices == 3);
+	REQUIRE(gpus[0] == gpu);
+	REQUIRE(gpus[1] == gpu);
+	REQUIRE(gpus[2] == gpu);
+	REQUIRE(outputs[0] == primitive.vertices + 0);
+	REQUIRE(outputs[1] == primitive.vertices + 1);
+	REQUIRE(outputs[2] == primitive.vertices + 2);
+
+	REQUIRE(inputs[0].gl_VertexID == 1);
+	REQUIRE(inputs[1].gl_VertexID == 3);
+	REQUIRE(inputs[2].gl_VertexID == 2);
+	REQUIRE((size_t) pullerOutputs[0].attributes[0] == 2100);
+	REQUIRE((size_t) pullerOutputs[1].attributes[0] == 2300);
+	REQUIRE((size_t) pullerOutputs[2].attributes[0] == 2200);
+	REQUIRE((size_t) pullerOutputs[0].attributes[1] == 120);
+	REQUIRE((size_t) pullerOutputs[1].attributes[1] == 140);
+	REQUIRE((size_t) pullerOutputs[2].attributes[1] == 130);
+	for (size_t i = 2; i < MAX_ATTRIBUTES; ++i)
+	{
+		REQUIRE((size_t) pullerOutputs[0].attributes[i] == 0);
+		REQUIRE((size_t) pullerOutputs[1].attributes[i] == 0);
+		REQUIRE((size_t) pullerOutputs[2].attributes[i] == 0);
+	}
+
+	baseInvocation = 3;
+	vsInvocationCounter = 0;
+	primitive.nofUsedVertices = 0;
+
+	gpu_runPrimitiveAssembly(
+		gpu, &primitive, nofPrimitiveVertices, &puller,
+		baseInvocation, static_cast<VertexShader const>(vs_test)
+	);
+
+	REQUIRE(vsInvocationCounter == 3);
+	REQUIRE(primitive.nofUsedVertices == 3);
+	REQUIRE(gpus[0] == gpu);
+	REQUIRE(gpus[1] == gpu);
+	REQUIRE(gpus[2] == gpu);
+	REQUIRE(outputs[0] == primitive.vertices + 0);
+	REQUIRE(outputs[1] == primitive.vertices + 1);
+	REQUIRE(outputs[2] == primitive.vertices + 2);
+
+	REQUIRE(inputs[0].gl_VertexID == 1);
+	REQUIRE(inputs[1].gl_VertexID == 2);
+	REQUIRE(inputs[2].gl_VertexID == 4);
+	REQUIRE((size_t) pullerOutputs[0].attributes[0] == 2100);
+	REQUIRE((size_t) pullerOutputs[1].attributes[0] == 2200);
+	REQUIRE((size_t) pullerOutputs[2].attributes[0] == 2400);
+	REQUIRE((size_t) pullerOutputs[0].attributes[1] == 120);
+	REQUIRE((size_t) pullerOutputs[1].attributes[1] == 130);
+	REQUIRE((size_t) pullerOutputs[2].attributes[1] == 150);
+	for (size_t i = 2; i < MAX_ATTRIBUTES; ++i)
+	{
+		REQUIRE((size_t) pullerOutputs[0].attributes[i] == 0);
+		REQUIRE((size_t) pullerOutputs[1].attributes[i] == 0);
+		REQUIRE((size_t) pullerOutputs[2].attributes[i] == 0);
+	}
+}
+
+
+TEST_CASE(
 	"gpu_computeScreenSpaceBarycentrics should compute barycentric "
 	"coordinates.")
 {
@@ -227,6 +408,41 @@ TEST_CASE(
 	REQUIRE(equalFloats(coords.data[0], 0.638112f));
 	REQUIRE(equalFloats(coords.data[1], 0.069675f));
 	REQUIRE(equalFloats(coords.data[2], 0.292213f));
+}
+
+
+TEST_CASE(
+	"SOLUTION_TEST: gpu_computeScreenSpaceBarycentrics should compute "
+	"barycentric coordinates")
+{
+	Vec3 coords;
+	Vec2 pixelCenter;
+	Vec2 vertices[VERTICES_PER_TRIANGLE];
+	Vec3 lines[EDGES_PER_TRIANGLE];
+
+	vertices[0].data[0] = 3.f;
+	vertices[0].data[1] = 101.f;
+	vertices[1].data[0] = 43.f;
+	vertices[1].data[1] = 133.f;
+	vertices[2].data[0] = 77.f;
+	vertices[2].data[1] = 477.f;
+	for (size_t v = 0; v < VERTICES_PER_TRIANGLE; ++v)
+	{
+		construct2DLine(
+			lines + v, vertices + v,
+			vertices + ((v + 1) % VERTICES_PER_TRIANGLE));
+	}
+	init_Vec2(&pixelCenter, 23.f, 144.f);
+	gpu_computeScreenSpaceBarycentrics(&coords, &pixelCenter, vertices, lines);
+	REQUIRE(equalFloats(coords.data[0], 0.572443f));
+	REQUIRE(equalFloats(coords.data[1], 0.34233f));
+	REQUIRE(equalFloats(coords.data[2], 0.0852273f));
+
+	init_Vec2(&pixelCenter, 33.f, 244.f);
+	gpu_computeScreenSpaceBarycentrics(&coords, &pixelCenter, vertices, lines);
+	REQUIRE(equalFloats(coords.data[0], 0.569287f));
+	REQUIRE(equalFloats(coords.data[1], 0.0550821f));
+	REQUIRE(equalFloats(coords.data[2], 0.375631f));
 }
 
 
@@ -341,6 +557,116 @@ TEST_CASE(
 }
 
 
+TEST_CASE(
+	"SOLUTION_TEST: phong_vertexShader should project vertex to clip-space")
+{
+	Mat4 viewMatrix;
+	Mat4 projectionMatrix;
+
+	// init projection matrix
+	perspective_Mat4(&projectionMatrix, MY_PI / 3.f, 1.f, 1.f, 1000.f);
+
+	// init view matrix
+	rotate_Mat4(&viewMatrix, 0.f, 0.f, 1.f, 1.1f);
+
+	// create gpu
+	GPU gpu = cpu_createGPU();
+
+	// reserve uniform for view matrix
+	cpu_reserveUniform(gpu, "viewMatrix", UNIFORM_MAT4);
+
+	// reserve uniform for projection matrix
+	cpu_reserveUniform(gpu, "projectionMatrix", UNIFORM_MAT4);
+
+	// upload matrices to gpu
+	cpu_uniformMatrix4fv(
+		gpu, getUniformLocation(gpu, "viewMatrix"),
+		(float *) &viewMatrix
+	);
+	cpu_uniformMatrix4fv(
+		gpu, getUniformLocation(gpu, "projectionMatrix"),
+		(float *) &projectionMatrix
+	);
+
+	// vertex data - position and normal
+	Vec3 vertex[2];
+	init_Vec3(vertex + 0, 10.f, 1.f, 100.f);
+	init_Vec3(vertex + 1, 1.f, 0.f, 0.f);
+
+	// create buffer
+	BufferID vbo;
+	cpu_createBuffers(gpu, 1, &vbo);
+
+	// upload data to buffer
+	cpu_bufferData(gpu, vbo, sizeof(vertex), vertex);
+
+	// create vertex puller
+	VertexPullerID puller;
+	cpu_createVertexPullers(gpu, 1, &puller);
+
+	// set position attribute
+	cpu_setVertexPullerHead(gpu, puller, 0, vbo, 0, sizeof(float) * 3);
+
+	// set normal attribute
+	cpu_setVertexPullerHead(
+		gpu, puller, 1, vbo, sizeof(float) * 3,
+		sizeof(float) * 3
+	);
+
+	// activate puller
+	cpu_bindVertexPuller(gpu, puller);
+
+	// create program
+	ProgramID prg = cpu_createProgram(gpu);
+	cpu_attachVertexShader(
+		gpu, prg, static_cast<VertexShader>(phong_vertexShader)
+	);
+
+	// set interpolation
+	cpu_setAttributeInterpolation(gpu, prg, 0, ATTRIB_VEC3, SMOOTH);
+	cpu_setAttributeInterpolation(gpu, prg, 1, ATTRIB_VEC3, SMOOTH);
+
+	// activate program
+	cpu_useProgram(gpu, prg);
+
+	// get puller configuration
+	const GPUVertexPullerConfiguration *const pullerConf =
+		gpu_getActiveVertexPuller(gpu);
+
+	// set puller output
+	GPUVertexPullerOutput pullerOutput;
+	pullerOutput.attributes[0] =
+		(uint8_t *) pullerConf->heads[0].buffer + sizeof(float) * 0;
+	pullerOutput.attributes[1] =
+		(uint8_t *) pullerConf->heads[1].buffer + sizeof(float) * 3;
+
+	// set vertex shader input
+	GPUVertexShaderInput vertexShaderInput;
+	vertexShaderInput.attributes = &pullerOutput;
+	vertexShaderInput.gl_VertexID = 0;
+
+	// run phong_vertexShader
+	GPUVertexShaderOutput outputVertex;
+	phong_vertexShader(&outputVertex, &vertexShaderInput, gpu);
+
+	REQUIRE(equalFloats(outputVertex.gl_Position.data[0], +6.3128976822e+00f));
+	REQUIRE(equalFloats(outputVertex.gl_Position.data[1], +1.6221815109e+01f));
+	REQUIRE(equalFloats(outputVertex.gl_Position.data[2], -1.0220220184e+02f));
+	REQUIRE(equalFloats(outputVertex.gl_Position.data[3], -1.0000000000e+02f));
+
+	const Vec3 *const position = (Vec3 *) outputVertex.attributes[0];
+	const Vec3 *const normal = (Vec3 *) outputVertex.attributes[1];
+
+	REQUIRE(position->data[0] == 10.f);
+	REQUIRE(position->data[1] == 1.f);
+	REQUIRE(position->data[2] == 100.f);
+
+	REQUIRE(normal->data[0] == 1.f);
+	REQUIRE(normal->data[1] == 0.f);
+	REQUIRE(normal->data[2] == 0.f);
+}
+
+
 TEST_CASE("phong_fragmentShader should compute phong color.")
 {
 	// create gpu
@@ -407,7 +733,67 @@ TEST_CASE("phong_fragmentShader should compute phong color.")
 	REQUIRE(equalFloats(outputFragment.color.data[3], 1.0000000000e+00f));
 }
 
-#endif // !defined(SOLUTION)
+
+TEST_CASE("SOLUTION_TEST: phong_fragmentShader should compute phong color.")
+{
+	// create gpu
+	GPU gpu = cpu_createGPU();
+
+	// reserve uniforms
+	cpu_reserveUniform(gpu, "cameraPosition", UNIFORM_VEC3);
+	cpu_reserveUniform(gpu, "lightPosition", UNIFORM_VEC3);
+
+	// upload uniform data
+	cpu_uniform3f(
+		gpu, getUniformLocation(gpu, "cameraPosition"), 0.f, 20.f,
+		20.f
+	);
+	cpu_uniform3f(
+		gpu, getUniformLocation(gpu, "lightPosition"), 0.f, 100.f, 0.f
+	);
+
+	// create program
+	ProgramID prg = cpu_createProgram(gpu);
+	cpu_attachFragmentShader(
+		gpu, prg, static_cast<FragmentShader>(phong_fragmentShader)
+	);
+
+	// set interpolation
+	cpu_setAttributeInterpolation(gpu, prg, 0, ATTRIB_VEC3, SMOOTH);
+	cpu_setAttributeInterpolation(gpu, prg, 1, ATTRIB_VEC3, SMOOTH);
+
+	// activate program
+	cpu_useProgram(gpu, prg);
+
+	// init input fragment
+	GPUFragmentShaderInput inputFragment;
+	inputFragment.coords.data[0] = 10.f;
+	inputFragment.coords.data[1] = 10.f;
+	init_Vec3((Vec3 *) inputFragment.attributes.attributes[0], 1.f, 1.f, 1.f);
+	init_Vec3((Vec3 *) inputFragment.attributes.attributes[1], 1.f, 3.f, 3.f);
+	inputFragment.depth = 0.f;
+
+	// init output fragment
+	GPUFragmentShaderOutput outputFragment;
+	zero_Vec4(&outputFragment.color);
+
+	// run fragment shader
+	phong_fragmentShader(&outputFragment, &inputFragment, gpu);
+
+	REQUIRE(equalFloats(outputFragment.color.data[0], 1.6810902670e-09f));
+	REQUIRE(equalFloats(outputFragment.color.data[1], 6.7890864611e-01f));
+	REQUIRE(equalFloats(outputFragment.color.data[2], 1.6810902670e-09f));
+	REQUIRE(equalFloats(outputFragment.color.data[3], 1.0000000000e+00f));
+
+	init_Vec3((Vec3 *) inputFragment.attributes.attributes[0], 1.f, 2.f, 1.f);
+	init_Vec3((Vec3 *) inputFragment.attributes.attributes[1], 3.f, 1.f, 2.f);
+	phong_fragmentShader(&outputFragment, &inputFragment, gpu);
+
+	REQUIRE(equalFloats(outputFragment.color.data[0], 0.0000000000e+00f));
+	REQUIRE(equalFloats(outputFragment.color.data[1], 2.5359907746e-01f));
+	REQUIRE(equalFloats(outputFragment.color.data[2], 0.0000000000e+00f));
+	REQUIRE(equalFloats(outputFragment.color.data[3], 1.0000000000e+00f));
+}
 
 
 TEST_CASE("Application should render correct image.")
@@ -549,396 +935,6 @@ TEST_CASE("Application should render correct image.")
 
 	phong_onExit();
 }
-
-
-#if defined(SOLUTION)
-
-TEST_CASE("SOLUTION_TEST: gpu_computeGLVertexID should compute gl_VertexID")
-{
-	WHEN(" using indexing")
-	{
-		const VertexIndex ind[] = {3, 10, 20, 20, 10, 30};
-		REQUIRE(gpu_computeGLVertexID(ind, 0) == 3);
-		REQUIRE(gpu_computeGLVertexID(ind, 1) == 10);
-		REQUIRE(gpu_computeGLVertexID(ind, 2) == 20);
-		REQUIRE(gpu_computeGLVertexID(ind, 3) == 20);
-		REQUIRE(gpu_computeGLVertexID(ind, 4) == 10);
-		REQUIRE(gpu_computeGLVertexID(ind, 5) == 30);
-	}
-	WHEN(" not using indexing")
-	{
-		REQUIRE(gpu_computeGLVertexID(nullptr, 10) == 10);
-		REQUIRE(gpu_computeGLVertexID(nullptr, 11) == 11);
-		REQUIRE(gpu_computeGLVertexID(nullptr, 12) == 12);
-		REQUIRE(gpu_computeGLVertexID(nullptr, 13) == 13);
-		REQUIRE(gpu_computeGLVertexID(nullptr, 14) == 14);
-		REQUIRE(gpu_computeGLVertexID(nullptr, 15) == 15);
-	}
-}
-
-
-TEST_CASE(
-	"SOLUTION_TEST: gpu_computeVertexAttributeDataPointer should compute data "
-	"pointer")
-{
-	GPUVertexPullerHead head;
-	head.offset = 100;
-	head.stride = 21;
-	head.enabled = 1;
-	head.buffer = (void *) 110;
-	REQUIRE(
-		(size_t) gpu_computeVertexAttributeDataPointer(&head, 666) == 14196
-	);
-	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 100) == 2310);
-	head.offset = 10;
-	head.stride = 1;
-	head.enabled = 1;
-	head.buffer = (void *) 1;
-	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 0) == 11);
-	REQUIRE((size_t) gpu_computeVertexAttributeDataPointer(&head, 1) == 12);
-}
-
-
-TEST_CASE("SOLUTION_TEST: gpu_runVertexPuller should construct vertex")
-{
-	GPUVertexPullerConfiguration puller;
-	const VertexIndex i[] = {
-		1, 2, 3, 4, 3, 2, 1, 4, 5,
-		6, 7, 8, 12, 11, 3, 4, 1, 7
-	};
-	puller.indices = i;
-	for (auto &head : puller.heads)
-	{ head.enabled = 0; }
-	puller.heads[0].offset = 3;
-	puller.heads[0].stride = 2;
-	puller.heads[0].enabled = 1;
-	puller.heads[0].buffer = (void *) 10;
-
-	puller.heads[1].offset = 33;
-	puller.heads[1].stride = 13;
-	puller.heads[1].enabled = 1;
-	puller.heads[1].buffer = (void *) 1000;
-
-	puller.heads[3].offset = 5;
-	puller.heads[3].stride = 7;
-	puller.heads[3].enabled = 1;
-	puller.heads[3].buffer = (void *) 111;
-
-	GPUVertexPullerOutput vertex;
-
-	gpu_runVertexPuller(&vertex, &puller, 10);
-
-	REQUIRE((size_t) vertex.attributes[0] == 27);
-	REQUIRE((size_t) vertex.attributes[1] == 1124);
-	REQUIRE((size_t) vertex.attributes[2] == 0);
-	REQUIRE((size_t) vertex.attributes[3] == 165);
-
-	gpu_runVertexPuller(&vertex, &puller, 11);
-	REQUIRE((size_t) vertex.attributes[0] == 29);
-	REQUIRE((size_t) vertex.attributes[1] == 1137);
-	REQUIRE((size_t) vertex.attributes[2] == 0);
-	REQUIRE((size_t) vertex.attributes[3] == 172);
-}
-
-
-TEST_CASE(
-	"SOLUTION_TEST: gpu_runPrimitiveAssembly should construct primitive")
-{
-	auto gpu = (GPU) 17;
-	GPUPrimitive primitive;
-	primitive.nofUsedVertices = 0;
-	size_t nofPrimitiveVertices = 3;
-	GPUVertexPullerConfiguration puller;
-	const VertexIndex indices[8] = {1, 3, 2, 1, 2, 4, 5, 100};
-	puller.indices = indices;
-	puller.heads[0].buffer = (void *) 1000;
-	puller.heads[0].stride = 100;
-	puller.heads[0].offset = 1000;
-	puller.heads[0].enabled = 1;
-	puller.heads[1].buffer = (void *) 100;
-	puller.heads[1].stride = 10;
-	puller.heads[1].offset = 10;
-	puller.heads[1].enabled = 1;
-	for (size_t i = 2; i < MAX_ATTRIBUTES; ++i)
-	{
-		puller.heads[i].buffer = (void *) nullptr;
-		puller.heads[i].stride = 0;
-		puller.heads[i].offset = 0;
-		puller.heads[i].enabled = 0;
-	}
-
-	VertexShaderInvocation baseInvocation = 0;
-	vsInvocationCounter = 0;
-
-	gpu_runPrimitiveAssembly(
-		gpu, &primitive, nofPrimitiveVertices, &puller,
-		baseInvocation, vs_test
-	);
-
-	REQUIRE(vsInvocationCounter == 3);
-	REQUIRE(primitive.nofUsedVertices == 3);
-	REQUIRE(gpus[0] == gpu);
-	REQUIRE(gpus[1] == gpu);
-	REQUIRE(gpus[2] == gpu);
-	REQUIRE(outputs[0] == primitive.vertices + 0);
-	REQUIRE(outputs[1] == primitive.vertices + 1);
-	REQUIRE(outputs[2] == primitive.vertices + 2);
-
-	REQUIRE(inputs[0].gl_VertexID == 1);
-	REQUIRE(inputs[1].gl_VertexID == 3);
-	REQUIRE(inputs[2].gl_VertexID == 2);
-	REQUIRE((size_t) pullerOutputs[0].attributes[0] == 2100);
-	REQUIRE((size_t) pullerOutputs[1].attributes[0] == 2300);
-	REQUIRE((size_t) pullerOutputs[2].attributes[0] == 2200);
-	REQUIRE((size_t) pullerOutputs[0].attributes[1] == 120);
-	REQUIRE((size_t) pullerOutputs[1].attributes[1] == 140);
-	REQUIRE((size_t) pullerOutputs[2].attributes[1] == 130);
-	for (size_t i = 2; i < MAX_ATTRIBUTES; ++i)
-	{
-		REQUIRE((size_t) pullerOutputs[0].attributes[i] == 0);
-		REQUIRE((size_t) pullerOutputs[1].attributes[i] == 0);
-		REQUIRE((size_t) pullerOutputs[2].attributes[i] == 0);
-	}
-
-	baseInvocation = 3;
-	vsInvocationCounter = 0;
-	primitive.nofUsedVertices = 0;
-
-	gpu_runPrimitiveAssembly(
-		gpu, &primitive, nofPrimitiveVertices, &puller,
-		baseInvocation, vs_test
-	);
-
-	REQUIRE(vsInvocationCounter == 3);
-	REQUIRE(primitive.nofUsedVertices == 3);
-	REQUIRE(gpus[0] == gpu);
-	REQUIRE(gpus[1] == gpu);
-	REQUIRE(gpus[2] == gpu);
-	REQUIRE(outputs[0] == primitive.vertices + 0);
-	REQUIRE(outputs[1] == primitive.vertices + 1);
-	REQUIRE(outputs[2] == primitive.vertices + 2);
-
-	REQUIRE(inputs[0].gl_VertexID == 1);
-	REQUIRE(inputs[1].gl_VertexID == 2);
-	REQUIRE(inputs[2].gl_VertexID == 4);
-	REQUIRE((size_t) pullerOutputs[0].attributes[0] == 2100);
-	REQUIRE((size_t) pullerOutputs[1].attributes[0] == 2200);
-	REQUIRE((size_t) pullerOutputs[2].attributes[0] == 2400);
-	REQUIRE((size_t) pullerOutputs[0].attributes[1] == 120);
-	REQUIRE((size_t) pullerOutputs[1].attributes[1] == 130);
-	REQUIRE((size_t) pullerOutputs[2].attributes[1] == 150);
-	for (size_t i = 2; i < MAX_ATTRIBUTES; ++i)
-	{
-		REQUIRE((size_t) pullerOutputs[0].attributes[i] == 0);
-		REQUIRE((size_t) pullerOutputs[1].attributes[i] == 0);
-		REQUIRE((size_t) pullerOutputs[2].attributes[i] == 0);
-	}
-}
-
-
-TEST_CASE(
-	"SOLUTION_TEST: gpu_computeScreenSpaceBarycentrics should compute "
-	"barycentric coordinates")
-{
-	Vec3 coords;
-	Vec2 pixelCenter;
-	Vec2 vertices[VERTICES_PER_TRIANGLE];
-	Vec3 lines[EDGES_PER_TRIANGLE];
-
-	vertices[0].data[0] = 3.f;
-	vertices[0].data[1] = 101.f;
-	vertices[1].data[0] = 43.f;
-	vertices[1].data[1] = 133.f;
-	vertices[2].data[0] = 77.f;
-	vertices[2].data[1] = 477.f;
-	for (size_t v = 0; v < VERTICES_PER_TRIANGLE; ++v)
-	{
-		construct2DLine(
-			lines + v, vertices + v,
-			vertices + ((v + 1) % VERTICES_PER_TRIANGLE));
-	}
-	init_Vec2(&pixelCenter, 23.f, 144.f);
-	gpu_computeScreenSpaceBarycentrics(&coords, &pixelCenter, vertices, lines);
-	REQUIRE(equalFloats(coords.data[0], 0.572443f));
-	REQUIRE(equalFloats(coords.data[1], 0.34233f));
-	REQUIRE(equalFloats(coords.data[2], 0.0852273f));
-
-	init_Vec2(&pixelCenter, 33.f, 244.f);
-	gpu_computeScreenSpaceBarycentrics(&coords, &pixelCenter, vertices, lines);
-	REQUIRE(equalFloats(coords.data[0], 0.569287f));
-	REQUIRE(equalFloats(coords.data[1], 0.0550821f));
-	REQUIRE(equalFloats(coords.data[2], 0.375631f));
-}
-
-
-TEST_CASE(
-	"SOLUTION_TEST: phong_vertexShader should project vertex to clip-space")
-{
-	Mat4 viewMatrix;
-	Mat4 projectionMatrix;
-
-	// init projection matrix
-	perspective_Mat4(&projectionMatrix, MY_PI / 3.f, 1.f, 1.f, 1000.f);
-
-	// init view matrix
-	rotate_Mat4(&viewMatrix, 0.f, 0.f, 1.f, 1.1f);
-
-	// create gpu
-	GPU gpu = cpu_createGPU();
-
-	// reserve uniform for view matrix
-	cpu_reserveUniform(gpu, "viewMatrix", UNIFORM_MAT4);
-
-	// reserve uniform for projection matrix
-	cpu_reserveUniform(gpu, "projectionMatrix", UNIFORM_MAT4);
-
-	// upload matrices to gpu
-	cpu_uniformMatrix4fv(
-		gpu, getUniformLocation(gpu, "viewMatrix"),
-		(float *) &viewMatrix
-	);
-	cpu_uniformMatrix4fv(
-		gpu, getUniformLocation(gpu, "projectionMatrix"),
-		(float *) &projectionMatrix
-	);
-
-	// vertex data - position and normal
-	Vec3 vertex[2];
-	init_Vec3(vertex + 0, 10.f, 1.f, 100.f);
-	init_Vec3(vertex + 1, 1.f, 0.f, 0.f);
-
-	// create buffer
-	BufferID vbo;
-	cpu_createBuffers(gpu, 1, &vbo);
-
-	// upload data to buffer
-	cpu_bufferData(gpu, vbo, sizeof(vertex), vertex);
-
-	// create vertex puller
-	VertexPullerID puller;
-	cpu_createVertexPullers(gpu, 1, &puller);
-
-	// set position attribute
-	cpu_setVertexPullerHead(gpu, puller, 0, vbo, 0, sizeof(float) * 3);
-
-	// set normal attribute
-	cpu_setVertexPullerHead(
-		gpu, puller, 1, vbo, sizeof(float) * 3,
-		sizeof(float) * 3
-	);
-
-	// activate puller
-	cpu_bindVertexPuller(gpu, puller);
-
-	// create program
-	ProgramID prg = cpu_createProgram(gpu);
-	cpu_attachVertexShader(gpu, prg, phong_vertexShader);
-
-	// set interpolation
-	cpu_setAttributeInterpolation(gpu, prg, 0, ATTRIB_VEC3, SMOOTH);
-	cpu_setAttributeInterpolation(gpu, prg, 1, ATTRIB_VEC3, SMOOTH);
-
-	// activate program
-	cpu_useProgram(gpu, prg);
-
-	// get puller configuration
-	const GPUVertexPullerConfiguration *const pullerConf =
-		gpu_getActiveVertexPuller(gpu);
-
-	// set puller output
-	GPUVertexPullerOutput pullerOutput;
-	pullerOutput.attributes[0] =
-		(uint8_t *) pullerConf->heads[0].buffer + sizeof(float) * 0;
-	pullerOutput.attributes[1] =
-		(uint8_t *) pullerConf->heads[1].buffer + sizeof(float) * 3;
-
-	// set vertex shader input
-	GPUVertexShaderInput vertexShaderInput;
-	vertexShaderInput.attributes = &pullerOutput;
-	vertexShaderInput.gl_VertexID = 0;
-
-	// run phong_vertexShader
-	GPUVertexShaderOutput outputVertex;
-	phong_vertexShader(&outputVertex, &vertexShaderInput, gpu);
-
-	REQUIRE(equalFloats(outputVertex.gl_Position.data[0], +6.3128976822e+00f));
-	REQUIRE(equalFloats(outputVertex.gl_Position.data[1], +1.6221815109e+01f));
-	REQUIRE(equalFloats(outputVertex.gl_Position.data[2], -1.0220220184e+02f));
-	REQUIRE(equalFloats(outputVertex.gl_Position.data[3], -1.0000000000e+02f));
-
-	const Vec3 *const position = (Vec3 *) outputVertex.attributes[0];
-	const Vec3 *const normal = (Vec3 *) outputVertex.attributes[1];
-
-	REQUIRE(position->data[0] == 10.f);
-	REQUIRE(position->data[1] == 1.f);
-	REQUIRE(position->data[2] == 100.f);
-
-	REQUIRE(normal->data[0] == 1.f);
-	REQUIRE(normal->data[1] == 0.f);
-	REQUIRE(normal->data[2] == 0.f);
-}
-
-
-TEST_CASE("SOLUTION_TEST: phong_fragmentShader should compute phong color.")
-{
-	// create gpu
-	GPU gpu = cpu_createGPU();
-
-	// reserve uniforms
-	cpu_reserveUniform(gpu, "cameraPosition", UNIFORM_VEC3);
-	cpu_reserveUniform(gpu, "lightPosition", UNIFORM_VEC3);
-
-	// upload uniform data
-	cpu_uniform3f(
-		gpu, getUniformLocation(gpu, "cameraPosition"), 0.f, 20.f,
-		20.f
-	);
-	cpu_uniform3f(
-		gpu, getUniformLocation(gpu, "lightPosition"), 0.f, 100.f, 0.f
-	);
-
-	// create program
-	ProgramID prg = cpu_createProgram(gpu);
-	cpu_attachFragmentShader(gpu, prg, phong_fragmentShader);
-
-	// set interpolation
-	cpu_setAttributeInterpolation(gpu, prg, 0, ATTRIB_VEC3, SMOOTH);
-	cpu_setAttributeInterpolation(gpu, prg, 1, ATTRIB_VEC3, SMOOTH);
-
-	// activate program
-	cpu_useProgram(gpu, prg);
-
-	// init input fragment
-	GPUFragmentShaderInput inputFragment;
-	inputFragment.coords.data[0] = 10.f;
-	inputFragment.coords.data[1] = 10.f;
-	init_Vec3((Vec3 *) inputFragment.attributes.attributes[0], 1.f, 1.f, 1.f);
-	init_Vec3((Vec3 *) inputFragment.attributes.attributes[1], 1.f, 3.f, 3.f);
-	inputFragment.depth = 0.f;
-
-	// init output fragment
-	GPUFragmentShaderOutput outputFragment;
-	zero_Vec4(&outputFragment.color);
-
-	// run fragment shader
-	phong_fragmentShader(&outputFragment, &inputFragment, gpu);
-
-	REQUIRE(equalFloats(outputFragment.color.data[0], 1.6810902670e-09f));
-	REQUIRE(equalFloats(outputFragment.color.data[1], 6.7890864611e-01f));
-	REQUIRE(equalFloats(outputFragment.color.data[2], 1.6810902670e-09f));
-	REQUIRE(equalFloats(outputFragment.color.data[3], 1.0000000000e+00f));
-
-	init_Vec3((Vec3 *) inputFragment.attributes.attributes[0], 1.f, 2.f, 1.f);
-	init_Vec3((Vec3 *) inputFragment.attributes.attributes[1], 3.f, 1.f, 2.f);
-	phong_fragmentShader(&outputFragment, &inputFragment, gpu);
-
-	REQUIRE(equalFloats(outputFragment.color.data[0], 0.0000000000e+00f));
-	REQUIRE(equalFloats(outputFragment.color.data[1], 2.5359907746e-01f));
-	REQUIRE(equalFloats(outputFragment.color.data[2], 0.0000000000e+00f));
-	REQUIRE(equalFloats(outputFragment.color.data[3], 1.0000000000e+00f));
-}
-
-#endif // defined(SOLUTION)
 
 
 void runConformanceTests(const char *gtFile)
