@@ -106,7 +106,7 @@ void phong_onInit(int32_t width, int32_t height)
 	// create program
 	phong.program = cpu_createProgram(phong.gpu);
 
-	// attach vertex shaders
+	// attach shaders
 	cpu_attachVertexShader(
 		phong.gpu, phong.program, (VertexShader) phong_vertexShader
 	);

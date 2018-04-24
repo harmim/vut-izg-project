@@ -658,10 +658,11 @@ void gpu_runPerspectiveDivision(GPUPrimitive *const primitive)
 
 	for (size_t v = 0; v < primitive->nofUsedVertices; ++v)
 	{
+		const float invDivisor =
+			1.f / primitive->vertices[v].gl_Position.data[3];
 		for (size_t k = 0; k < 3; ++k)
 		{
-			primitive->vertices[v].gl_Position.data[k] /=
-				primitive->vertices[v].gl_Position.data[3];
+			primitive->vertices[v].gl_Position.data[k] *= invDivisor;
 		}
 	}
 }
@@ -849,8 +850,9 @@ float gpu_smoothInterpolate(
 	float divisor = 0.f;
 	for (size_t i = 0; i < WEIGHTS_PER_BARYCENTRICS; ++i)
 	{
-		dividend += values[i] * weights[i] / homogeneousCoords[i];
-		divisor += weights[i] / homogeneousCoords[i];
+		const float divInc = weights[i] / homogeneousCoords[i];
+		dividend += values[i] * divInc;
+		divisor += divInc;
 	}
 	return dividend / divisor;
 }
@@ -1258,7 +1260,8 @@ void cpu_drawTriangles(const GPU gpu, const size_t nofVertices)
 		// draw sub primitives
 		for (size_t c = 0; c < clippedTriangles.nofTriangles; ++c)
 		{
-			// create sub primitive using clipped triangle and original primitive
+			// create sub primitive using clipped triangle and
+			// original primitive
 			GPUPrimitive subPrimitive;
 			gpu_createSubPrimitive(
 				&subPrimitive, &primitive,
