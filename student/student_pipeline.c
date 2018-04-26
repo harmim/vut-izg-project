@@ -94,16 +94,15 @@ void gpu_runVertexPuller(
 	assert(puller != NULL);
 
 	// compute vertex ID
-	VertexIndex gl_VertexID =
+	const VertexIndex gl_VertexID =
 		gpu_computeGLVertexID(puller->indices, vertexShaderInvocation);
 
 	// set vertex puller attributes
 	for (int i = 0; i < MAX_ATTRIBUTES; i++)
 	{
-		output->attributes[i] =
-			gpu_computeVertexAttributeDataPointer(
-				&puller->heads[i], gl_VertexID
-			);
+		output->attributes[i] = gpu_computeVertexAttributeDataPointer(
+			&puller->heads[i], gl_VertexID
+		);
 	}
 }
 
@@ -136,6 +135,7 @@ void gpu_runPrimitiveAssembly(
  *  - GPUVertexPullerOutput()
  *  - GPUVertexShaderInput()
  */
+	assert(gpu != NULL);
 	assert(primitive != NULL);
 	assert(nofPrimitiveVertices <= VERTICES_PER_TRIANGLE);
 	assert(puller != NULL);
@@ -145,7 +145,7 @@ void gpu_runPrimitiveAssembly(
 	for (int i = 0; i < nofPrimitiveVertices; i++)
 	{
 		// compute vertex shader invocation number
-		VertexShaderInvocation vertexShaderInvocation =
+		const VertexShaderInvocation vertexShaderInvocation =
 			baseVertexShaderInvocation + i;
 
 		// run vertex puller
@@ -155,7 +155,7 @@ void gpu_runPrimitiveAssembly(
 		);
 
 		// compute vertex ID
-		VertexIndex gl_VertexID =
+		const VertexIndex gl_VertexID =
 			gpu_computeGLVertexID(puller->indices, vertexShaderInvocation);
 
 		// run vertex shader
@@ -793,12 +793,12 @@ void gpu_computeScreenSpaceBarycentrics(
 	sub_Vec2(&b, &vertices[2], &vertices[0]);
 	sub_Vec2(&c, pixelCenter, &vertices[0]);
 
-	const float aa = dot_Vec2(&a, &a);
-	const float ab = dot_Vec2(&a, &b);
-	const float bb = dot_Vec2(&b, &b);
-	const float ca = dot_Vec2(&c, &a);
-	const float cb = dot_Vec2(&c, &b);
-	const float k = 1.f / (aa * bb - ab * ab);
+	const float aa = dot_Vec2(&a, &a),
+		ab = dot_Vec2(&a, &b),
+		bb = dot_Vec2(&b, &b),
+		ca = dot_Vec2(&c, &a),
+		cb = dot_Vec2(&c, &b),
+		k = 1.f / (aa * bb - ab * ab);
 
 	coords->data[1] = k * (bb * ca - ab * cb);
 	coords->data[2] = k * (aa * cb - ab * ca);

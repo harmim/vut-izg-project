@@ -130,12 +130,10 @@ void phong_onInit(int32_t width, int32_t height)
 
 	// set data to buffers
 	cpu_bufferData(
-		phong.gpu, bunnyVerticesBuffer,
-		sizeof(bunnyVertices) / sizeof(BunnyVertex), bunnyVertices
+		phong.gpu, bunnyVerticesBuffer, sizeof(bunnyVertices), bunnyVertices
 	);
 	cpu_bufferData(
-		phong.gpu, bunnyIndicesBuffer,
-		sizeof(bunnyIndices) / sizeof(VertexIndex), bunnyIndices
+		phong.gpu, bunnyIndicesBuffer, sizeof(bunnyIndices), bunnyIndices
 	);
 
 	// create vertex puller
@@ -158,9 +156,7 @@ void phong_onInit(int32_t width, int32_t height)
 	cpu_enableVertexPullerHead(phong.gpu, phong.puller, 1);
 
 	// set vertex puller indexing
-	cpu_setIndexing(
-		phong.gpu, phong.puller, bunnyIndicesBuffer, sizeof(uint32_t)
-	);
+	cpu_setIndexing(phong.gpu, phong.puller, bunnyIndicesBuffer, sizeof(float));
 }
 /**
  * @}
@@ -216,19 +212,19 @@ void phong_onDraw(SDL_Surface *surface)
 		phong.gpu, getUniformLocation(phong.gpu, "viewMatrix"),
 		(float *) &viewMatrix
 	);
-	// set view matrix uniform data
+	// set projection matrix uniform data
 	cpu_uniformMatrix4fv(
 		phong.gpu, getUniformLocation(phong.gpu, "projectionMatrix"),
 		(float *) &projectionMatrix
 	);
-	// set view matrix uniform data
+	// set camera position uniform data
 	cpu_uniform3f(
 		phong.gpu, getUniformLocation(phong.gpu, "cameraPosition"),
 		cameraPosition.data[0],
 		cameraPosition.data[1],
 		cameraPosition.data[2]
 	);
-	// set view matrix uniform data
+	// set light position uniform data
 	cpu_uniform3f(
 		phong.gpu, getUniformLocation(phong.gpu, "lightPosition"),
 		phong.lightPosition.data[0],
@@ -237,7 +233,7 @@ void phong_onDraw(SDL_Surface *surface)
 	);
 
 	// let's draw
-	cpu_drawTriangles(phong.gpu, sizeof(bunnyVertices) / sizeof(BunnyVertex));
+	cpu_drawTriangles(phong.gpu, sizeof(bunnyIndices) / sizeof(VertexIndex));
 
 	// copy image from gpu to SDL surface
 	cpu_swapBuffers(surface, phong.gpu);

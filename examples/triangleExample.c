@@ -110,7 +110,7 @@ void triangleExample_vertexShader(
 	copy_Vec3Float_To_Vec4(&pos4, position, 1.f);
 
 	multiply_Mat4_Vec4(
-		// output - position of output vertex// in clip-space
+		// output - position of output vertex in clip-space
 		&output->gl_Position,
 		&mvp,                  // projection view matrix
 		&pos4                  // position of vertex in world-space
