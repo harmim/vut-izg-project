@@ -248,7 +248,7 @@ void phong_fragmentShader(
 	init_Vec3(&specualrColor, 1.f, 1.f, 1.f);
 
 	// specular = specularColor
-	//     * pow(max(dot(reflectLightNormal, negPosition), 0), shininessFaktor)
+	//     * pow(max(dot(reflectLightNormal, camera), 0), shininessFaktor)
 	Vec3 specular;
 	multiply_Vec3_Float(
 		&specular, &specualrColor, powf(
