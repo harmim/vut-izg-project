@@ -68,7 +68,9 @@ const void *gpu_computeVertexAttributeDataPointer(
 		return NULL;
 	}
 
-	return head->buffer + head->offset + head->stride * gl_VertexID;
+	return (void *) (
+		(size_t) head->buffer + head->offset + head->stride * gl_VertexID
+	);
 }
 
 
@@ -142,7 +144,7 @@ void gpu_runPrimitiveAssembly(
 	assert(vertexShader != NULL);
 
 	// run verex puller/vertex shader nofPrimitiveVertices times
-	for (int i = 0; i < nofPrimitiveVertices; i++)
+	for (size_t i = 0; i < nofPrimitiveVertices; i++)
 	{
 		// compute vertex shader invocation number
 		const VertexShaderInvocation vertexShaderInvocation =
