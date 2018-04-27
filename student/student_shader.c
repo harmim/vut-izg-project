@@ -187,14 +187,10 @@ void phong_fragmentShader(
 	const Vec3 *const position =
 		fs_interpretInputAttributeAsVec3(gpu, input, 0);
 	// get normal attribute
-	const Vec3 *const normal =
-		fs_interpretInputAttributeAsVec3(gpu, input, 1);
+	Vec3 normal = *fs_interpretInputAttributeAsVec3(gpu, input, 1);
+	normalize_Vec3(&normal, &normal);
 
 	/******************** phong shading ********************/
-
-	// _normal = normalize(normal)
-	Vec3 _normal;
-	normalize_Vec3(&_normal, normal);
 
 	// light = normalize(lightPosition - position)
 	Vec3 light;
@@ -206,9 +202,9 @@ void phong_fragmentShader(
 	sub_Vec3(&camera, cameraPosition, position);
 	normalize_Vec3(&camera, &camera);
 
-	// reflectLightNormal = normalize(-reflect(light, _normal))
+	// reflectLightNormal = normalize(-reflect(light, normal))
 	Vec3 reflectLightNormal;
-	reflect(&reflectLightNormal, &light, &_normal);
+	reflect(&reflectLightNormal, &light, &normal);
 	multiply_Vec3_Float(&reflectLightNormal, &reflectLightNormal, -1.f);
 	normalize_Vec3(&reflectLightNormal, &reflectLightNormal);
 
@@ -216,45 +212,34 @@ void phong_fragmentShader(
 	const float shininessFaktor = 40.f;
 
 	Vec3 diffuseColor;
-	const float eps = 0.0001f;
-	if (
-		fabsf(fabsf(_normal.data[0]) - 1.f) <= eps
-		&& fabsf(_normal.data[1]) <= eps
-		&& fabsf(_normal.data[2]) <= eps
-	) // horizontal
-	{
+	const float eps = .001f,
+		nY = normal.data[1];
+	if (fabsf(nY - 1.f) <= eps)
+	{ // nY == 1 => normal goes vertical up
+		// diffuseColor = white
+		init_Vec3(&diffuseColor, 1.f, 1.f, 1.f);
+	}
+	else if (nY < 0 || fabsf(nY) <= eps)
+	{ // nY < 0 OR nY == 0 => normal goes vertical down or it is horizontal
 		// diffuseColor = green
 		init_Vec3(&diffuseColor, 0.f, 1.f, 0.f);
 	}
-	else if (fabsf(_normal.data[0]) <= eps && fabsf(_normal.data[1]) <= eps)
-	{ // vertical
-		if (_normal.data[2] >= 0) // up
-		{
-			// diffuseColor = white
-			init_Vec3(&diffuseColor, 0.f, 0.f, 1.f);
-		}
-		else // down
-		{
-			// diffuseColor = green
-			init_Vec3(&diffuseColor, 0.f, 1.f, 0.f);
-		}
-	}
 	else
-	{
+	{ // nY < 1 AND nY > 0
 		// diffuseColor = linear interpolation of white and green
-		const float t = fabsf(_normal.data[1] * _normal.data[1]);
+		const float t = fabsf(nY * nY);
 		init_Vec3(
 			&diffuseColor,
-			t, // (1.f - 0.f) * t + 0.f => t
-			1.f, // (1.f - 1.f) * t + 1.f => 1.f
-			t // (1.f - 0.f) * t + 0.f => t
+			t,   // (1 - 0) * t + 0 => t
+			1.f, // (1 - 1) * t + 1 => 1
+			t    // (1 - 0) * t + 0 => t
 		);
 	}
 
-	// diffuse = diffuseColor * max(dot(_normal, light), 0)
+	// diffuse = diffuseColor * max(dot(normal, light), 0)
 	Vec3 diffuse;
 	multiply_Vec3_Float(
-		&diffuse, &diffuseColor, fmaxf(dot_Vec3(&_normal, &light), 0.f)
+		&diffuse, &diffuseColor, fmaxf(dot_Vec3(&normal, &light), 0.f)
 	);
 	clampVec3(&diffuse, 0.f, 1.f);
 
