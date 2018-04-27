@@ -925,17 +925,6 @@ void cpu_useProgram(const GPU gpu, const ProgramID program)
 	if (it == g->programs.end())
 	{ return; }
 	g->activeProgram = program;
-
-//	extern Mat4 viewMatrix;
-//	extern Mat4 projectionMatrix;
-//	std::cout << "viewMatrix:" << std::endl;
-//	for(size_t i=0;i<16;++i)
-//		std::cout << std::showpos << std::scientific << std::setprecision(10)
-//			<< viewMatrix.column[i / 4].data[i % 4] << "f" <<std::endl;
-//	std::cout << "projectionMatrix:" << std::endl;
-//	for(size_t i=0;i<16;++i)
-//		std::cout << std::showpos << std::scientific << std::setprecision(10)
-//			<< projectionMatrix.column[i / 4].data[i % 4] << "f" << std::endl;
 }
 
 

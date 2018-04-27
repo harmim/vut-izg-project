@@ -247,7 +247,7 @@ void triangleExample_onInit(int32_t width, int32_t height)
 	cpu_bufferData(
 		triangleExample.gpu,      // gpu
 		triangleExample.vertices, // buffer id
-		sizeof(float) * 9,        // size of data that is going to be copied to buffer
+		sizeof(float) * 9,  // size of data that is going to be copied to buffer
 		positions                 // pointer to data
 	);
 	//! [BUFFER]

@@ -50,7 +50,9 @@ void perspective_Mat4(
 	assert(output != NULL);
 	float leftRight = near * tanf(fovy / 2.f) * aspect;
 	float bottomTop = near * tanf(fovy / 2.f);
-	frustum_Mat4(output, -leftRight, leftRight, -bottomTop, bottomTop, near, far);
+	frustum_Mat4(
+		output, -leftRight, leftRight, -bottomTop, bottomTop, near, far
+	);
 }
 
 
