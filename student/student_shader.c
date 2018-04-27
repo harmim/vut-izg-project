@@ -211,16 +211,16 @@ void phong_fragmentShader(
 	// shininessFaktor = 40
 	const float shininessFaktor = 40.f;
 
+	// diffuseColor calculation
 	Vec3 diffuseColor;
-	const float eps = .001f,
-		nY = normal.data[1];
+	const float eps = .001f, nY = normal.data[1];
 	if (fabsf(nY - 1.f) <= eps)
 	{ // nY == 1 => normal goes vertical up
 		// diffuseColor = white
 		init_Vec3(&diffuseColor, 1.f, 1.f, 1.f);
 	}
 	else if (nY < 0 || fabsf(nY) <= eps)
-	{ // nY < 0 OR nY == 0 => normal goes vertical down or it is horizontal
+	{ // nY < 0 OR nY == 0 => normal goes down or it is horizontal
 		// diffuseColor = green
 		init_Vec3(&diffuseColor, 0.f, 1.f, 0.f);
 	}
